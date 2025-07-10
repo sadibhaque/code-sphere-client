@@ -1,0 +1,135 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Megaphone, Calendar, Clock } from "lucide-react";
+import { useState } from "react";
+
+const announcements = [
+    {
+        id: "a1",
+        title: "New Feature: Dark Mode Available!",
+        description:
+            "We've just rolled out dark mode. Check it out in your settings!",
+        date: "2024-07-01",
+    },
+    {
+        id: "a2",
+        title: "Forum Maintenance Scheduled",
+        description:
+            "Scheduled maintenance on July 15th, 2024, from 2 AM to 4 AM UTC.",
+        date: "2024-06-28",
+    },
+];
+
+export default function Announcement() {
+    const [hoveredAnnouncement, setHoveredAnnouncement] = useState(null);
+
+    if (announcements.length === 0) {
+        return null;
+    }
+
+    return (
+        <section className="w-full py-12 animate-fade-in">
+            <div className="container mx-auto px-4 md:px-6">
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 hover-lift">
+                    <CardHeader className="pb-6">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-3 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white animate-pulse-slow">
+                                <Megaphone className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-2xl font-bold text-gradient">
+                                    Latest Announcements
+                                </CardTitle>
+                                <p className="text-muted-foreground text-sm mt-1">
+                                    Stay updated with the latest news and
+                                    updates
+                                </p>
+                            </div>
+                        </div>
+                        <Badge
+                            variant="secondary"
+                            className="w-fit bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800"
+                        >
+                            {announcements.length} New Update
+                            {announcements.length > 1 ? "s" : ""}
+                        </Badge>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-64">
+                            <div className="space-y-4">
+                                {announcements.map((announcement, index) => (
+                                    <div
+                                        key={announcement.id}
+                                        className={cn(
+                                            "p-4 rounded-xl border border-amber-200/50 dark:border-amber-800/50 transition-all-smooth hover-lift cursor-pointer stagger-item",
+                                            "bg-gradient-to-r from-background/50 to-amber-50/50 dark:to-amber-950/50",
+                                            hoveredAnnouncement ===
+                                                announcement.id &&
+                                                "shadow-md border-amber-300 dark:border-amber-700"
+                                        )}
+                                        style={{
+                                            animationDelay: `${index * 0.1}s`,
+                                        }}
+                                        onMouseEnter={() =>
+                                            setHoveredAnnouncement(
+                                                announcement.id
+                                            )
+                                        }
+                                        onMouseLeave={() =>
+                                            setHoveredAnnouncement(null)
+                                        }
+                                    >
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-lg mb-2 text-foreground">
+                                                    {announcement.title}
+                                                </h3>
+                                                <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                                                    {announcement.description}
+                                                </p>
+                                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar className="h-3 w-3" />
+                                                        <span>
+                                                            Posted:{" "}
+                                                            {new Date(
+                                                                announcement.date
+                                                            ).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>
+                                                            {Math.floor(
+                                                                (Date.now() -
+                                                                    new Date(
+                                                                        announcement.date
+                                                                    ).getTime()) /
+                                                                    (1000 *
+                                                                        60 *
+                                                                        60 *
+                                                                        24)
+                                                            )}{" "}
+                                                            days ago
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
+                                                <Megaphone className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
+            </div>
+        </section>
+    );
+}
