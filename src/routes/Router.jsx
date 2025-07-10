@@ -11,6 +11,9 @@ import AddPost from "../pages/Dashboard/AddPost";
 import MyPosts from "../pages/Dashboard/MyPosts";
 import PostDetail from "../pages/Post/PostDetails";
 import MembershipCard from "../pages/Membership/Membership";
+import AuthLayout from "../layouts/AuthLayout";
+import Register from "../components/Register";
+import Login from "../components/Login";
 
 const router = createBrowserRouter([
     {
@@ -25,7 +28,16 @@ const router = createBrowserRouter([
             {
                 path: "/membership",
                 element: <MembershipCard />,
-            }
+            },
+        ],
+    },
+    {
+        path: "/auth",
+        element: <AuthLayout />,
+        children: [
+            { index: true, element: <Login /> },
+            { path: "/auth/register", element: <Register /> },
+            { path: "/auth/login", element: <Login /> },
         ],
     },
     {
