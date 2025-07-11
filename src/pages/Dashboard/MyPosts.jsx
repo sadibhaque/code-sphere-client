@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Table,
     TableBody,
@@ -17,6 +17,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import axios from "axios/unsafe/axios.js";
 
 // Dummy posts data
 const dummyMyPosts = [
@@ -96,17 +97,22 @@ const dummyMyPosts = [
 
 export default function MyPosts() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [posts, setPosts] = useState(dummyMyPosts);
     const postsPerPage = 10; // 10 posts per page as per challenge task
-
+    
     const totalVotes = (post) => post.upvotes - post.downvotes;
+    
+    const [posts, setPosts] = useState([]);
+        useEffect(() => {
+            axios.get("http://localhost:3000/posts").then((response) => {
+                setPosts(response.data);
+            });
+        }, []);
 
     // Pagination logic
     const indexOfLastPost = currentPage * postsPerPage;
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
     const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
     const totalPages = Math.ceil(posts.length / postsPerPage);
-
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     const handleDelete = (postId) => {

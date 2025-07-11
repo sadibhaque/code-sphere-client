@@ -47,7 +47,7 @@ export default function PostCard({ post }) {
                         </p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="h-3 w-3" />
-                            <span>{post.time}</span>
+                            <span>{post.createdAt}</span>
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@ export default function PostCard({ post }) {
                         />
                     </h3>
                     <p className="text-muted-foreground line-clamp-3 leading-relaxed mb-4">
-                        {post.description}
+                        {post.content}
                     </p>
                 </Link>
 

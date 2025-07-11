@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Card,
     CardContent,
@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import PostCard from "../../components/PostCard";
 import useAuth from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
+import axios from "../../../node_modules/axios/lib/axios";
 
 // const posts = [
 //     {
@@ -145,22 +147,23 @@ import useAuth from "../../hooks/useAuth";
 // ];
 
 export default function UserDashboard() {
-    const userInfo = {
-        name: "mendax",
-        email: "mendax@example.com",
-        badge: "bronze",
-    };
-
-    const [posts, setPosts] = useState([]);
-
+    
     const { user } = useAuth();
+    const userHook = useUser(user);
+    
+    const [posts, setPosts] = useState([]);
+    useEffect(() => {
+        axios.get("http://localhost:3000/posts").then((response) => {
+            setPosts(response.data);
+        });
+    }, []);
 
     // Filter dummy posts by current user's email (dummy logic)
-    const userPosts = posts.filter(
-        (post) =>
-            post.authorName === user.name || post.authorImage === user.image
-    );
-    const recentPosts = posts; // Get up to 3 recent posts
+    const recentPosts = posts
+        .filter((post) => post.authorEmail === user.email)
+        .sort((a, b) => new Date(b.time) - new Date(a.time))
+        .slice(0, 3);
+    // const recentPosts = posts; // Get up to 3 recent posts
 
     return (
         <div className="grid gap-6">
@@ -189,15 +192,8 @@ export default function UserDashboard() {
                             <p className="text-muted-foreground">
                                 {user.email}
                             </p>
-                            <Badge
-                                className="w-fit mt-2"
-                                // variant={
-                                //     user.badge === "Gold"
-                                //         ? "default"
-                                //         : "secondary"
-                                // }
-                            >
-                                {user.badge}
+                            <Badge className="w-fit mt-2">
+                                {userHook?.badge}
                             </Badge>
                         </div>
                     </div>
