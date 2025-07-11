@@ -95,9 +95,9 @@ export default function Footer() {
                         </h3>
                         <nav className="flex flex-col space-y-2">
                             {[
-                                { href: "#", label: "Documentation" },
-                                { href: "#", label: "API Reference" },
-                                { href: "#", label: "Community Guidelines" },
+                                { href: "#1", label: "Documentation" },
+                                { href: "#2", label: "API Reference" },
+                                { href: "#3", label: "Community Guidelines" },
                                 { href: "#", label: "Help Center" },
                             ].map((link) => (
                                 <Link

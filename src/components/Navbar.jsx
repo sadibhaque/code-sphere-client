@@ -13,16 +13,22 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 // import { useUser } from "@/lib/user-context";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { cn } from "@/lib/utils";
+import { AuthContext } from "../providers/AuthProvider";
 
 export default function Navbar() {
-    const { user, logout } = [];
+    const { user, logoutUser } = useContext(AuthContext);
     const [announcementCount] = useState(2);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
-    setIsLoggedIn;
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            setIsLoggedIn(true);
+        }
+    }, [user]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -31,6 +37,15 @@ export default function Navbar() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logoutUser();
+            setIsLoggedIn(false);
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
 
     return (
         <header
@@ -41,7 +56,7 @@ export default function Navbar() {
         >
             <div className="container mx-auto max-w-10/12 h-16 flex items-center justify-between">
                 <Link
-                    href="/"
+                    to="/"
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
                 >
                     <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground group-hover:scale-105 transition-transform">
@@ -55,7 +70,7 @@ export default function Navbar() {
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-6">
                     <Link
-                        href="/"
+                        to="/"
                         className="text-sm font-medium hover:text-primary transition-colors relative group"
                     >
                         Home
@@ -72,19 +87,21 @@ export default function Navbar() {
 
                 <div className="flex items-center gap-3">
                     {/* Notification Bell */}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative hover:bg-muted/50 transition-all-smooth hover:scale-105"
-                    >
-                        <Bell className="h-5 w-5" />
-                        {announcementCount > 0 && (
-                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
-                                {announcementCount}
-                            </span>
-                        )}
-                        <span className="sr-only">Notifications</span>
-                    </Button>
+                    {isLoggedIn && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative hover:bg-muted/50 transition-all-smooth hover:scale-105"
+                        >
+                            <Bell className="h-5 w-5" />
+                            {announcementCount > 0 && (
+                                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
+                                    {announcementCount}
+                                </span>
+                            )}
+                            <span className="sr-only">Notifications</span>
+                        </Button>
+                    )}
 
                     {/* User Menu or Login Button */}
                     {isLoggedIn ? (
@@ -97,13 +114,14 @@ export default function Navbar() {
                                     <Avatar className="h-10 w-10 ring-2 ring-background shadow-md">
                                         <AvatarImage
                                             src={
-                                                user?.image ||
+                                                user?.photoURL ||
                                                 "/placeholder-user.jpg"
                                             }
-                                            alt={user?.name}
+                                            alt={user?.displayName}
                                         />
                                         <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-                                            {user?.name.charAt(0)}
+                                            {user?.displayName?.charAt(0) ||
+                                                user?.email?.charAt(0)}
                                         </AvatarFallback>
                                     </Avatar>
                                 </Button>
@@ -116,7 +134,7 @@ export default function Navbar() {
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-medium leading-none">
-                                            {user?.name}
+                                            {user?.displayName || "User"}
                                         </p>
                                         <p className="text-xs leading-none text-muted-foreground">
                                             {user?.email}
@@ -130,7 +148,8 @@ export default function Navbar() {
                                 >
                                     <Link
                                         to={
-                                            user?.isAdmin
+                                            user?.role === "admin" ||
+                                            user?.metadata?.role === "admin"
                                                 ? "/dashboard/admin"
                                                 : "/dashboard/user"
                                         }
@@ -140,7 +159,7 @@ export default function Navbar() {
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    onClick={logout}
+                                    onClick={handleLogout}
                                     className="cursor-pointer text-red-600 focus:text-red-600"
                                 >
                                     <LogOut className="mr-2 h-4 w-4" />
@@ -149,7 +168,7 @@ export default function Navbar() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <Link href="/login">
+                        <Link to="/auth/login">
                             <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all-smooth hover:scale-105 shadow-md">
                                 Join Us
                             </Button>
@@ -177,14 +196,14 @@ export default function Navbar() {
                 <div className="md:hidden border-t bg-background/95 backdrop-blur-sm animate-fade-in">
                     <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
                         <Link
-                            href="/"
+                            to="/"
                             className="text-sm font-medium hover:text-primary transition-colors"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             Home
                         </Link>
                         <Link
-                            href="/membership"
+                            to="/membership"
                             className="text-sm font-medium hover:text-primary transition-colors"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >

@@ -14,6 +14,8 @@ import MembershipCard from "../pages/Membership/Membership";
 import AuthLayout from "../layouts/AuthLayout";
 import Register from "../components/Register";
 import Login from "../components/Login";
+import AuthProvider from "../providers/AuthProvider";
+import PrivateRoute from "../contexts/PrivateRoute";
 
 const router = createBrowserRouter([
     {
@@ -27,7 +29,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/membership",
-                element: <MembershipCard />,
+                element: (
+                    <PrivateRoute>
+                        <MembershipCard />
+                    </PrivateRoute>
+                ),
             },
         ],
     },
@@ -42,26 +48,67 @@ const router = createBrowserRouter([
     },
     {
         path: "/dashboard",
-        element: <DashBoardLayout></DashBoardLayout>,
+        element: (
+            <PrivateRoute>
+                <DashBoardLayout />
+            </PrivateRoute>
+        ),
         children: [
-            { path: "/dashboard/user", element: <UserDashboard /> },
+            {
+                path: "/dashboard/user",
+                element: (
+                    <PrivateRoute>
+                        <UserDashboard />
+                    </PrivateRoute>
+                ),
+            },
             {
                 path: "/dashboard/user/add-post",
-                element: <AddPost />,
+                element: (
+                    <PrivateRoute>
+                        <AddPost />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: "/dashboard/user/my-posts",
-                element: <MyPosts />,
+                element: (
+                    <PrivateRoute>
+                        <MyPosts />
+                    </PrivateRoute>
+                ),
             },
-            { path: "/dashboard/admin", element: <AdminDashboard /> },
-            { path: "/dashboard/admin/manage-users", element: <ManageUsers /> },
+            {
+                path: "/dashboard/admin",
+                element: (
+                    <PrivateRoute>
+                        <AdminDashboard />
+                    </PrivateRoute>
+                ),
+            },
+            {
+                path: "/dashboard/admin/manage-users",
+                element: (
+                    <PrivateRoute>
+                        <ManageUsers />
+                    </PrivateRoute>
+                ),
+            },
             {
                 path: "/dashboard/admin/reported-comments",
-                element: <ReportedComments />,
+                element: (
+                    <PrivateRoute>
+                        <ReportedComments />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: "/dashboard/admin/make-announcement",
-                element: <MakeAnnouncement />,
+                element: (
+                    <PrivateRoute>
+                        <MakeAnnouncement />
+                    </PrivateRoute>
+                ),
             },
         ],
     },

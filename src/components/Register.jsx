@@ -8,10 +8,97 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, AtSign, User } from "lucide-react";
 import { Link } from "react-router";
+import { FaGoogle } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+// Registration form validation schema
+const registerSchema = yup.object().shape({
+    fullName: yup
+        .string()
+        .required("Full name is required")
+        .min(3, "Full name must be at least 3 characters"),
+    username: yup
+        .string()
+        .required("Username is required")
+        .min(3, "Username must be at least 3 characters")
+        .matches(
+            /^[a-zA-Z0-9_]+$/,
+            "Username can only contain letters, numbers and underscores"
+        ),
+    email: yup
+        .string()
+        .email("Please enter a valid email address")
+        .required("Email is required"),
+    password: yup
+        .string()
+        .required("Password is required")
+        .min(6, "Password must be at least 6 characters")
+        .matches(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{6,}$/,
+            "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+        ),
+    confirmPassword: yup
+        .string()
+        .required("Please confirm your password")
+        .oneOf([yup.ref("password"), null], "Passwords must match"),
+});
 
 export default function Register() {
+    const [isLoading, setIsLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+
+    // Initialize react-hook-form
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm({
+        resolver: yupResolver(registerSchema),
+    });
+
+    // Handle email/password registration
+    const onSubmit = async (data) => {
+        try {
+            setIsLoading(true);
+            console.log("Registration data:", data);
+
+            // Here you will add Firebase authentication later
+            // For now, just logging the data and simulating a successful registration
+
+            // Reset form after successful registration
+            // reset();
+
+            // TODO: Redirect user after successful registration
+        } catch (error) {
+            console.error("Registration error:", error.message);
+            // TODO: Show error message to user
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle Google registration
+    const handleGoogleSignup = async () => {
+        try {
+            setGoogleLoading(true);
+            console.log("Initiating Google signup");
+
+            // Here you will add Firebase Google authentication later
+
+            // TODO: Redirect user after successful registration
+        } catch (error) {
+            console.error("Google signup error:", error.message);
+            // TODO: Show error message to user
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
     return (
         <div className="w-full max-w-md mx-auto animate-scale-in">
             <Card className="border-0 shadow-2xl bg-gradient-to-br from-background to-muted/20 hover-lift">
@@ -20,15 +107,61 @@ export default function Register() {
                         <Lock className="h-8 w-8" />
                     </div>
                     <CardTitle className="text-3xl font-bold text-gradient">
-                        Welcome To CodeSphere !
+                        Sign Up
                     </CardTitle>
-                    <CardDescription className="text-base">
-                        Create your account to start your journey
-                    </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-6">
-                    <form className="space-y-5">
+                    <form
+                        className="space-y-5"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="fullName"
+                                className="text-sm font-medium"
+                            >
+                                Full Name
+                            </Label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input
+                                    id="fullName"
+                                    type="text"
+                                    placeholder="Enter your full name"
+                                    className="pl-10 h-12 border-2 focus:border-primary transition-all-smooth"
+                                    {...register("fullName")}
+                                />
+                            </div>
+                            {errors.fullName && (
+                                <p className="text-red-500 text-sm mt-1 animate-fade-in">
+                                    {errors.fullName.message}
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="username"
+                                className="text-sm font-medium"
+                            >
+                                Username
+                            </Label>
+                            <div className="relative">
+                                <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input
+                                    id="username"
+                                    type="text"
+                                    placeholder="Enter your username"
+                                    className="pl-10 h-12 border-2 focus:border-primary transition-all-smooth"
+                                    {...register("username")}
+                                />
+                            </div>
+                            {errors.username && (
+                                <p className="text-red-500 text-sm mt-1 animate-fade-in">
+                                    {errors.username.message}
+                                </p>
+                            )}
+                        </div>
                         <div className="space-y-2">
                             <Label
                                 htmlFor="email"
@@ -43,25 +176,23 @@ export default function Register() {
                                     type="email"
                                     placeholder="Enter your email"
                                     className="pl-10 h-12 border-2 focus:border-primary transition-all-smooth"
+                                    {...register("email")}
                                 />
                             </div>
+                            {errors.email && (
+                                <p className="text-red-500 text-sm mt-1 animate-fade-in">
+                                    {errors.email.message}
+                                </p>
+                            )}
                         </div>
 
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Label
-                                    htmlFor="password"
-                                    className="text-sm font-medium"
-                                >
-                                    Password
-                                </Label>
-                                <Link
-                                    to="#"
-                                    className="text-sm text-primary hover:underline transition-colors"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </div>
+                            <Label
+                                htmlFor="password"
+                                className="text-sm font-medium"
+                            >
+                                Password
+                            </Label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <Input
@@ -69,18 +200,77 @@ export default function Register() {
                                     type="password"
                                     placeholder="Enter your password"
                                     className="pl-10 h-12 border-2 focus:border-primary transition-all-smooth"
+                                    {...register("password")}
                                 />
                             </div>
+                            {errors.password && (
+                                <p className="text-red-500 text-sm mt-1 animate-fade-in">
+                                    {errors.password.message}
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="confirmPassword"
+                                className="text-sm font-medium"
+                            >
+                                Confirm Password
+                            </Label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input
+                                    id="confirmPassword"
+                                    type="password"
+                                    placeholder="Confirm your password"
+                                    className="pl-10 h-12 border-2 focus:border-primary transition-all-smooth"
+                                    {...register("confirmPassword")}
+                                />
+                            </div>
+                            {errors.confirmPassword && (
+                                <p className="text-red-500 text-sm mt-1 animate-fade-in">
+                                    {errors.confirmPassword.message}
+                                </p>
+                            )}
                         </div>
 
                         <Button
                             type="submit"
                             className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all-smooth hover:scale-105 shadow-lg text-base font-medium"
+                            disabled={isLoading}
                         >
-                            <div className="flex items-center gap-2">
-                                Sign In
-                                <ArrowRight className="h-4 w-4" />
-                            </div>
+                            {isLoading ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Creating account...
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    Sign Up
+                                    <ArrowRight className="h-4 w-4" />
+                                </div>
+                            )}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full h-12 border-2 border-primary hover:bg-primary/10 transition-all-smooth hover:scale-105 shadow-md font-medium"
+                            onClick={handleGoogleSignup}
+                            disabled={googleLoading}
+                        >
+                            {googleLoading ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                    Connecting...
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 justify-center">
+                                    <span>Sign Up With Google</span>
+                                    <span className="text-lg text-primary">
+                                        <FaGoogle />
+                                    </span>
+                                </div>
+                            )}
                         </Button>
                     </form>
 
@@ -88,10 +278,10 @@ export default function Register() {
                         <p className="text-sm text-muted-foreground">
                             Already have an account?{" "}
                             <Link
-                                to="/register"
+                                to="/login"
                                 className="text-primary hover:underline font-medium transition-colors"
                             >
-                                Register Now
+                                Login here
                             </Link>
                         </p>
                     </div>
