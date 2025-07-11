@@ -67,25 +67,25 @@ export default function Navbar() {
                     </span>
                 </Link>
 
-                {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-6">
-                    <Link
-                        to="/"
-                        className="text-sm font-medium hover:text-primary transition-colors relative group"
-                    >
-                        Home
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-                    </Link>
-                    <Link
-                        to="/membership"
-                        className="text-sm font-medium hover:text-primary transition-colors relative group"
-                    >
-                        Membership
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-                    </Link>
-                </nav>
+                <div className="flex items-center gap-4">
+                    {/* Desktop Navigation - Moved to the right */}
+                    <nav className="hidden md:flex items-center gap-6 mr-2">
+                        <Link
+                            to="/"
+                            className="text-sm font-medium hover:text-primary transition-colors relative group"
+                        >
+                            Home
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </Link>
+                        <Link
+                            to="/membership"
+                            className="text-sm font-medium hover:text-primary transition-colors relative group"
+                        >
+                            Membership
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </Link>
+                    </nav>
 
-                <div className="flex items-center gap-3">
                     {/* Notification Bell */}
                     {isLoggedIn && (
                         <Button

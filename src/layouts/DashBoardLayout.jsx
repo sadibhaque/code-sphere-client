@@ -80,7 +80,7 @@ export default function DashBoardLayout({ children }) {
     ];
 
     // const navItems = user.isAdmin ? adminNavItems : userNavItems;
-    const navItems = adminNavItems;
+    const navItems = userNavItems;
 
     return (
         <div>
