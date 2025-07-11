@@ -63,11 +63,11 @@ export default function Login() {
             loginUser(data.email, data.password)
                 .then((userCredential) => {
                     setUser(userCredential.user);
+                    toast.success("Login successful");
                     navigate(`${location.state ? location.state : "/"}`);
-                    // toast.success("Login successful");
                 })
                 .catch((error) => {
-                    // toast.error(error.message);
+                    toast.error(error.message);
                     console.log(error.message);
                 });
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { Link } from "react-router";
 import { Code, Bell, LayoutDashboard, LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +14,7 @@ import {
 import { useState, useEffect, useContext } from "react";
 import { cn } from "@/lib/utils";
 import { AuthContext } from "../providers/AuthProvider";
+import { toast } from "sonner";
 
 export default function Navbar() {
     const { user, logoutUser } = useContext(AuthContext);
@@ -41,6 +40,7 @@ export default function Navbar() {
     const handleLogout = async () => {
         try {
             await logoutUser();
+            toast.success("Logged out successfully");
             setIsLoggedIn(false);
         } catch (error) {
             console.error("Logout failed:", error);

@@ -9,12 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, ArrowRight, AtSign, User } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { FaGoogle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "sonner";
+import { AuthContext } from "../providers/AuthProvider";
 
 // Registration form validation schema
 const registerSchema = yup.object().shape({
@@ -50,7 +52,11 @@ const registerSchema = yup.object().shape({
 
 export default function Register() {
     const [isLoading, setIsLoading] = useState(false);
-    const [googleLoading, setGoogleLoading] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const { user, createUser, loginWithGoogle, updateUser, setUser } =
+        useContext(AuthContext);
 
     // Initialize react-hook-form
     const {
@@ -66,17 +72,45 @@ export default function Register() {
     const onSubmit = async (data) => {
         try {
             setIsLoading(true);
-            console.log("Registration data:", data);
+            // console.log("Registration data:", data);
 
             // Here you will add Firebase authentication later
             // For now, just logging the data and simulating a successful registration
+
+            createUser(data.email, data.password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    updateUser({ displayName: data.fullName })
+                        .then(() => {
+                            setUser({
+                                ...user,
+                                displayName: data.fullName,
+                            });
+                            toast.success("Registration successful");
+                            console.log("Registration successful");
+                            // Reset form after successful registration
+                            reset();
+                            // Navigate to home or previous page
+                            navigate(location?.state?.from || "/");
+                        })
+                        .catch((error) => {
+                            toast.error(
+                                `Profile update failed: ${error.message}`
+                            );
+                            console.error("Profile update error:", error);
+                        });
+                })
+                .catch((error) => {
+                    toast.error(`Registration failed: ${error.message}`);
+                    console.error("Registration error:", error.message);
+                });
 
             // Reset form after successful registration
             // reset();
 
             // TODO: Redirect user after successful registration
         } catch (error) {
-            console.error("Registration error:", error.message);
+            toast.error("Registration error:", error.message);
             // TODO: Show error message to user
         } finally {
             setIsLoading(false);
@@ -86,17 +120,20 @@ export default function Register() {
     // Handle Google registration
     const handleGoogleSignup = async () => {
         try {
-            setGoogleLoading(true);
+            setIsLoading(true);
             console.log("Initiating Google signup");
 
-            // Here you will add Firebase Google authentication later
-
-            // TODO: Redirect user after successful registration
+            // Use the loginWithGoogle function from AuthContext
+            const result = await loginWithGoogle();
+            if (result.user) {
+                toast.success("Google sign up successful");
+                navigate(location?.state?.from || "/");
+            }
         } catch (error) {
             console.error("Google signup error:", error.message);
-            // TODO: Show error message to user
+            toast.error(`Google signup failed: ${error.message}`);
         } finally {
-            setGoogleLoading(false);
+            setIsLoading(false);
         }
     };
     return (
@@ -278,7 +315,7 @@ export default function Register() {
                         <p className="text-sm text-muted-foreground">
                             Already have an account?{" "}
                             <Link
-                                to="/login"
+                                to="/auth/login"
                                 className="text-primary hover:underline font-medium transition-colors"
                             >
                                 Login here
