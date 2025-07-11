@@ -32,10 +32,8 @@ const loginSchema = yup.object().shape({
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
-    const [googleLoading, setGoogleLoading] = useState(false);
 
-    const { loginUser, loginWithGoogle, setUser, user } =
-        useContext(AuthContext);
+    const { loginUser, setUser, user } = useContext(AuthContext);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -46,7 +44,7 @@ export default function Login() {
         register,
         handleSubmit,
         formState: { errors },
-        reset,
+        // reset,
     } = useForm({
         resolver: yupResolver(loginSchema),
     });
@@ -82,33 +80,7 @@ export default function Login() {
             setIsLoading(false);
         }
     };
-    // Handle Google login
-    const handleGoogleLogin = async () => {
-        try {
-            setGoogleLoading(true);
-            console.log("Initiating Google login");
 
-            // Here you will add Firebase Google authentication later
-
-            loginWithGoogle()
-                .then((result) => {
-                    setUser(result.user);
-                    toast.success("Login successful");
-                    navigate(`${location.state ? location.state : "/"}`);
-                })
-                .catch((error) => {
-                    toast.error(error.message);
-                    console.error(error);
-                });
-
-            // TODO: Redirect user after successful login
-        } catch (error) {
-            console.error("Google login error:", error.message);
-            // TODO: Show error message to user
-        } finally {
-            setGoogleLoading(false);
-        }
-    };
     return (
         <div className="w-full max-w-md mx-auto animate-scale-in">
             <Card className="border-0 shadow-2xl bg-gradient-to-br from-background to-muted/20 hover-lift">
@@ -196,28 +168,6 @@ export default function Login() {
                                 <div className="flex items-center gap-2">
                                     Login
                                     <ArrowRight className="h-4 w-4" />
-                                </div>
-                            )}
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full h-12 border-2 border-primary hover:bg-primary/10 transition-all-smooth hover:scale-105 shadow-md font-medium"
-                            onClick={handleGoogleLogin}
-                            disabled={googleLoading}
-                        >
-                            {googleLoading ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                    Connecting...
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-2 justify-center">
-                                    <span>Sign in With Google</span>
-                                    <span className="text-lg text-primary">
-                                        <FaGoogle />
-                                    </span>
                                 </div>
                             )}
                         </Button>

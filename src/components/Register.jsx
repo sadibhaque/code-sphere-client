@@ -55,7 +55,7 @@ export default function Register() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { user, createUser, loginWithGoogle, updateUser, setUser } =
+    const {  createUser, updateUser, setUser } =
         useContext(AuthContext);
 
     // Initialize react-hook-form
@@ -80,6 +80,21 @@ export default function Register() {
             createUser(data.email, data.password)
                 .then((userCredential) => {
                     const user = userCredential.user;
+                    const userInfo = {
+                        email: data.email,
+                        role: "user", // default role
+                        created_at: new Date().toISOString(),
+                        last_log_in: new Date().toISOString(),
+                    };
+
+                    fetch(`http://localhost:3000/users`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(userInfo),
+                    });
+
                     updateUser({ displayName: data.fullName })
                         .then(() => {
                             setUser({
@@ -117,25 +132,6 @@ export default function Register() {
         }
     };
 
-    // Handle Google registration
-    const handleGoogleSignup = async () => {
-        try {
-            setIsLoading(true);
-            console.log("Initiating Google signup");
-
-            // Use the loginWithGoogle function from AuthContext
-            const result = await loginWithGoogle();
-            if (result.user) {
-                toast.success("Google sign up successful");
-                navigate(location?.state?.from || "/");
-            }
-        } catch (error) {
-            console.error("Google signup error:", error.message);
-            toast.error(`Google signup failed: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
     return (
         <div className="w-full max-w-md mx-auto animate-scale-in">
             <Card className="border-0 shadow-2xl bg-gradient-to-br from-background to-muted/20 hover-lift">
@@ -284,28 +280,6 @@ export default function Register() {
                                 <div className="flex items-center gap-2">
                                     Sign Up
                                     <ArrowRight className="h-4 w-4" />
-                                </div>
-                            )}
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full h-12 border-2 border-primary hover:bg-primary/10 transition-all-smooth hover:scale-105 shadow-md font-medium"
-                            onClick={handleGoogleSignup}
-                            disabled={googleLoading}
-                        >
-                            {googleLoading ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                    Connecting...
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-2 justify-center">
-                                    <span>Sign Up With Google</span>
-                                    <span className="text-lg text-primary">
-                                        <FaGoogle />
-                                    </span>
                                 </div>
                             )}
                         </Button>
