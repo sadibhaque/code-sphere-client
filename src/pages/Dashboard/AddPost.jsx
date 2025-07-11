@@ -1,59 +1,43 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-// Dummy tags data
-const dummyTags = [
-    "React",
-    "JavaScript",
-    "TypeScript",
-    "Node.js",
-    "Python",
-    "CSS",
-    "HTML",
-    "Web Development",
-    "Frontend",
-    "Backend",
-    "Database",
-    "API",
-    "MongoDB",
-    "Express",
-    "Next.js",
-    "Vue.js",
-    "Angular",
-    "Bootstrap",
-    "Tailwind CSS",
-    "GraphQL",
-];
+import { toast } from "sonner";
+import { AuthContext } from "@/providers/AuthProvider";
 
 export default function AddPost() {
+    const { user } = useContext(AuthContext);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const [formData, setFormData] = useState({
-        authorImage: "/placeholder-user.jpg",
-        authorName: "mendax", // Default user name
-        authorEmail: "mendax@example.com", // Default user email
         title: "",
         description: "",
-        tags: [],
-        upvotes: 0,
-        downvotes: 0,
+        tagList: [],
     });
     const [errors, setErrors] = useState({});
-    const [selectedTagInput, setSelectedTagInput] = useState("");
+    // Initialize tagList as an empty array
+    const [tagList, setTagList] = useState([]);
+
+    const list = [1, 2, 3, 4];
+
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/tags");
+                const data = await response.json();
+                setTagList(data[0].tagList);
+            } catch (error) {
+                console.error("Error fetching tags:", error);
+                setTagList([]);
+            }
+        };
+
+        fetchTags();
+    }, []);
 
     const validateForm = () => {
         const newErrors = {};
-
-        if (!formData.authorName.trim()) {
-            newErrors.authorName = "Author name is required.";
-        }
-
-        if (!formData.authorEmail.trim()) {
-            newErrors.authorEmail = "Author email is required.";
-        } else if (!/\S+@\S+\.\S+/.test(formData.authorEmail)) {
-            newErrors.authorEmail = "Invalid email address.";
-        }
 
         if (!formData.title.trim() || formData.title.trim().length < 5) {
             newErrors.title = "Title must be at least 5 characters.";
@@ -67,24 +51,11 @@ export default function AddPost() {
                 "Description must be at least 20 characters.";
         }
 
-        if (formData.tags.length === 0) {
-            newErrors.tags = "At least one tag is required.";
-        }
-
-        if (formData.authorImage && !isValidUrl(formData.authorImage)) {
-            newErrors.authorImage = "Please enter a valid URL.";
+        if (formData.tagList.length === 0) {
+            newErrors.tagList = "At least one tag is required.";
         }
 
         return newErrors;
-    };
-
-    const isValidUrl = (string) => {
-        try {
-            new URL(string);
-            return true;
-        } catch {
-            return false;
-        }
     };
 
     const handleInputChange = (e) => {
@@ -104,18 +75,17 @@ export default function AddPost() {
     };
 
     const handleTagSelect = (tag) => {
-        if (!formData.tags.includes(tag)) {
+        if (!formData.tagList.includes(tag)) {
             setFormData((prev) => ({
                 ...prev,
-                tags: [...prev.tags, tag],
+                tagList: [...prev.tagList, tag],
             }));
-            setSelectedTagInput("");
 
-            // Clear tags error
-            if (errors.tags) {
+            // Clear tagList error
+            if (errors.tagList) {
                 setErrors((prev) => ({
                     ...prev,
-                    tags: "",
+                    tagList: "",
                 }));
             }
         }
@@ -124,11 +94,11 @@ export default function AddPost() {
     const handleTagRemove = (tagToRemove) => {
         setFormData((prev) => ({
             ...prev,
-            tags: prev.tags.filter((tag) => tag !== tagToRemove),
+            tagList: prev.tagList.filter((tag) => tag !== tagToRemove),
         }));
     };
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
         const newErrors = validateForm();
 
@@ -137,74 +107,58 @@ export default function AddPost() {
             return;
         }
 
-        console.log("New Post Data:", formData);
-        alert("Post added successfully!");
+        setIsSubmitting(true);
 
-        // Reset form
-        setFormData({
-            authorImage: "/placeholder-user.jpg",
-            authorName: "mendax",
-            authorEmail: "mendax@example.com",
-            title: "",
-            description: "",
-            tags: [],
-            upvotes: 0,
-            downvotes: 0,
-        });
-        setErrors({});
-        setSelectedTagInput("");
+        try {
+            // Prepare the post data
+            const postData = {
+                title: formData.title,
+                content: formData.description,
+                authorName: user?.displayName || "Anonymous User",
+                authorEmail: user?.email || "",
+                tagList: formData.tagList,
+                upvotes: 0,
+                downvotes: 0,
+            };
+
+            // Send POST request to the API
+            const response = await fetch("http://localhost:3000/posts", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to create post");
+            }
+
+            // Show success message
+            toast.success("Post created successfully!");
+
+            // Reset form
+            setFormData({
+                title: "",
+                description: "",
+                tagList: [],
+            });
+            setErrors({});
+        } catch (error) {
+            console.error("Error creating post:", error);
+            toast.error(
+                error.message || "Failed to create post. Please try again."
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <form onSubmit={onSubmit} className="grid gap-6">
-            <div className="grid gap-2">
-                <Label htmlFor="authorImage">Author Image URL</Label>
-                <Input
-                    id="authorImage"
-                    name="authorImage"
-                    type="url"
-                    value={formData.authorImage}
-                    onChange={handleInputChange}
-                    disabled
-                />
-                {errors.authorImage && (
-                    <p className="text-red-500 text-sm">{errors.authorImage}</p>
-                )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                    <Label htmlFor="authorName">Author Name</Label>
-                    <Input
-                        id="authorName"
-                        name="authorName"
-                        type="text"
-                        value={formData.authorName}
-                        onChange={handleInputChange}
-                        disabled
-                    />
-                    {errors.authorName && (
-                        <p className="text-red-500 text-sm">
-                            {errors.authorName}
-                        </p>
-                    )}
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="authorEmail">Author Email</Label>
-                    <Input
-                        id="authorEmail"
-                        name="authorEmail"
-                        type="email"
-                        value={formData.authorEmail}
-                        onChange={handleInputChange}
-                        disabled
-                    />
-                    {errors.authorEmail && (
-                        <p className="text-red-500 text-sm">
-                            {errors.authorEmail}
-                        </p>
-                    )}
-                </div>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             <div className="grid gap-2">
                 <Label htmlFor="title">Post Title</Label>
                 <Input
@@ -239,17 +193,21 @@ export default function AddPost() {
                     <select
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value=""
-                        onChange={(e) => handleTagSelect(e.target.value)}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                handleTagSelect(e.target.value);
+                            }
+                        }}
                     >
                         <option value="">Select a tag...</option>
-                        {dummyTags.map((tag) => (
+                        {tagList.map((tag) => (
                             <option key={tag} value={tag}>
                                 {tag}
                             </option>
                         ))}
                     </select>
                     <div className="flex flex-wrap gap-2">
-                        {formData.tags.map((tag) => (
+                        {formData.tagList.map((tag) => (
                             <span
                                 key={tag}
                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -266,34 +224,19 @@ export default function AddPost() {
                         ))}
                     </div>
                 </div>
-                {errors.tags && (
-                    <p className="text-red-500 text-sm">{errors.tags}</p>
+                {errors.tagList && (
+                    <p className="text-red-500 text-sm">{errors.tagList}</p>
                 )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                    <Label htmlFor="upvotes">UpVotes (Default: 0)</Label>
-                    <Input
-                        id="upvotes"
-                        name="upvotes"
-                        type="number"
-                        value={formData.upvotes}
-                        disabled
-                    />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="downvotes">DownVotes (Default: 0)</Label>
-                    <Input
-                        id="downvotes"
-                        name="downvotes"
-                        type="number"
-                        value={formData.downvotes}
-                        disabled
-                    />
-                </div>
-            </div>
-            <Button type="submit" className="w-full">
-                Add Post
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Creating Post...
+                    </div>
+                ) : (
+                    "Add Post"
+                )}
             </Button>
         </form>
     );

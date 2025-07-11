@@ -12,7 +12,7 @@ import { Mail, Lock, ArrowRight, AtSign, User } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { FaGoogle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "sonner";
@@ -54,9 +54,15 @@ export default function Register() {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const [usernameStatus, setUsernameStatus] = useState({
+        checked: false,
+        available: false,
+        message: "",
+    });
+    const [checkingUsername, setCheckingUsername] = useState(false);
+    const usernameTimeoutRef = useRef(null);
 
-    const {  createUser, updateUser, setUser } =
-        useContext(AuthContext);
+    const { createUser, updateUser, setUser } = useContext(AuthContext);
 
     // Initialize react-hook-form
     const {
@@ -68,9 +74,117 @@ export default function Register() {
         resolver: yupResolver(registerSchema),
     });
 
+    // Effect to clean up any pending timeout when component unmounts
+    useEffect(() => {
+        return () => {
+            if (usernameTimeoutRef.current) {
+                clearTimeout(usernameTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleUsernameChange = () => {
+        const usernameInput = document.getElementById("username");
+        const username = usernameInput.value.trim().toLowerCase();
+
+        // Clear any existing timeout
+        if (usernameTimeoutRef.current) {
+            clearTimeout(usernameTimeoutRef.current);
+        }
+
+        // Only check availability if username meets minimum requirements
+        if (username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username)) {
+            setCheckingUsername(true);
+            setUsernameStatus({
+                checked: false,
+                available: false,
+                message: "Checking availability...",
+            });
+
+            // Debounce the API call by 500ms
+            usernameTimeoutRef.current = setTimeout(() => {
+                // Call API to check if username is available
+                fetch(
+                    `http://localhost:3000/users/check-username?username=${username}`
+                )
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.available) {
+                            setUsernameStatus({
+                                checked: true,
+                                available: true,
+                                message: "Username is available!",
+                            });
+                        } else {
+                            setUsernameStatus({
+                                checked: true,
+                                available: false,
+                                message: "Username is already taken.",
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error checking username:", error);
+                        setUsernameStatus({
+                            checked: true,
+                            available: false,
+                            message: "Error checking username availability.",
+                        });
+                    })
+                    .finally(() => {
+                        setCheckingUsername(false);
+                    });
+            }, 500);
+        } else if (username.length > 0) {
+            // If username doesn't meet requirements but has content
+            setUsernameStatus({
+                checked: true,
+                available: false,
+                message:
+                    "Username must be at least 3 characters and only contain letters, numbers, and underscores.",
+            });
+        } else {
+            // If username is empty
+            setUsernameStatus({
+                checked: false,
+                available: false,
+                message: "",
+            });
+        }
+
+        // Set the formatted username back to the input field
+        usernameInput.value = username;
+    };
+
     // Handle email/password registration
     const onSubmit = async (data) => {
         try {
+            // Check if username is available before proceeding
+            if (!usernameStatus.available) {
+                // First check if we need to verify the username
+                const username = data.username.trim().toLowerCase();
+
+                // Make one final check if the username is available
+                const response = await fetch(
+                    `http://localhost:3000/users/check-username?username=${username}`
+                );
+                const checkResult = await response.json();
+
+                if (!checkResult.available) {
+                    toast.error(
+                        "Username is already taken. Please choose a different username."
+                    );
+                    return;
+                }
+
+                // Update username status if it's available
+                setUsernameStatus({
+                    checked: true,
+                    available: true,
+                    message: "Username is available!",
+                });
+            }
+
             setIsLoading(true);
             // console.log("Registration data:", data);
 
@@ -83,6 +197,8 @@ export default function Register() {
                     const userInfo = {
                         email: data.email,
                         role: "user", // default role
+                        username: data.username.toLowerCase(),
+                        badge: "bronze", // default badge
                         created_at: new Date().toISOString(),
                         last_log_in: new Date().toISOString(),
                     };
@@ -93,13 +209,24 @@ export default function Register() {
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify(userInfo),
-                    });
+                    })
+                        .then(() => {
+                            console.log("User created successfully");
+                        })
+                        .catch((error) => {
+                            toast.error(
+                                `User creation failed: ${error.message}`
+                            );
+                        });
 
                     updateUser({ displayName: data.fullName })
                         .then(() => {
                             setUser({
                                 ...user,
                                 displayName: data.fullName,
+                                role: "user", // default role
+                                username: data.username.toLowerCase(),
+                                badge: "bronze", // default badge
                             });
                             toast.success("Registration successful");
                             console.log("Registration successful");
@@ -187,8 +314,27 @@ export default function Register() {
                                     placeholder="Enter your username"
                                     className="pl-10 h-12 border-2 focus:border-primary transition-all-smooth"
                                     {...register("username")}
+                                    onInput={() => {
+                                        handleUsernameChange();
+                                    }}
                                 />
                             </div>
+                            {checkingUsername && (
+                                <p className="text-blue-500 text-sm mt-1 animate-pulse">
+                                    Checking username availability...
+                                </p>
+                            )}
+                            {!checkingUsername && usernameStatus.checked && (
+                                <p
+                                    className={`text-sm mt-1 animate-fade-in ${
+                                        usernameStatus.available
+                                            ? "text-green-500"
+                                            : "text-orange-500"
+                                    }`}
+                                >
+                                    {usernameStatus.message}
+                                </p>
+                            )}
                             {errors.username && (
                                 <p className="text-red-500 text-sm mt-1 animate-fade-in">
                                     {errors.username.message}

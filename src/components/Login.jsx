@@ -61,6 +61,18 @@ export default function Login() {
             loginUser(data.email, data.password)
                 .then((userCredential) => {
                     setUser(userCredential.user);
+                    fetch(`http://localhost:3000/users/${data.email}`)
+                        .then((response) => response.json())
+                        .then((x) => {
+                            setUser({
+                                ...userCredential.user,
+                                username: x.username.toLowerCase(),
+                                role: x.role || "user", // default to user if not set
+                                badge: x.badge || "bronze", // default badge
+                            });
+                        })
+                        .catch((error) => console.error("Fetch error:", error));
+
                     toast.success("Login successful");
                     navigate(`${location.state ? location.state : "/"}`);
                 })
