@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Card,
     CardContent,
@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import useUser from "../../hooks/useUser";
 import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
+import axios from "axios/unsafe/axios.js";
+import { toast } from "sonner";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
@@ -58,32 +60,47 @@ const dummyUsers = [
 export default function AdminDashboard() {
     const [newTag, setNewTag] = useState("");
     const [errors, setErrors] = useState({});
-    const [tags, setTags] = useState([
-        "React",
-        "JavaScript",
-        "CSS",
-        "Node.js",
-        "Database",
-        "Web Development",
-        "Frontend",
-        "Backend",
-        "API",
-        "Tutorial",
-    ]);
+    const [tags, setTags] = useState([]);
+    const [tagsId, setTagsId] = useState("");
 
     const { user } = useAuth();
     const userHook = useUser(user);
     const navigate = useNavigate();
 
+    const [postCount, setPostCount] = useState(0);
+    const [userCount, setUserCount] = useState(0);
+    const [commentCount, setCommentCount] = useState(0);
+
     if (userHook?.role !== "admin") {
         navigate("/dashboard/user");
     }
 
-    // Dummy data for pie chart
+    useEffect(() => {
+        axios.get("http://localhost:3000/posts/count").then((response) => {
+            const totalPosts = response.data.totalPosts;
+            setPostCount(totalPosts);
+        });
+        axios.get("http://localhost:3000/users-count").then((response) => {
+            const totalUsers = response.data.totalUsers;
+            setUserCount(totalUsers);
+        });
+        axios.get("http://localhost:3000/comments/count").then((response) => {
+            const totalComments = response.data.totalComments;
+            setCommentCount(totalComments);
+        });
+
+        axios.get("http://localhost:3000/tags").then((response) => {
+            const fetchedTags = response.data[0]?.tagList || [];
+            setTagsId(response.data[0]?._id);
+            setTags(fetchedTags);
+        });
+    }, []);
+
+    // data for pie chart
     const chartData = [
-        { name: "Total Posts", value: dummyPosts.length },
-        { name: "Total Comments", value: dummyComments.length },
-        { name: "Total Users", value: dummyUsers.length },
+        { name: "Total Posts", value: postCount },
+        { name: "Total Comments", value: commentCount },
+        { name: "Total Users", value: userCount },
     ];
 
     const validateTag = (tagValue) => {
@@ -107,9 +124,16 @@ export default function AdminDashboard() {
         }
 
         setTags([...tags, trimmedTag]);
+
+        // console.log(tags);
+
+        axios.put(`http://localhost:3000/tags/${tagsId}`, {
+            tagList: [...tags, trimmedTag],
+        });
+
         setNewTag("");
         setErrors({});
-        alert(`Tag "${trimmedTag}" added successfully!`);
+        toast.success(`Tag "${trimmedTag}" added successfully!`);
     };
 
     return (
@@ -140,9 +164,8 @@ export default function AdminDashboard() {
                                 {user.email}
                             </p>
                             <p className="text-sm text-muted-foreground mt-2">
-                                Total Posts: {dummyPosts.length} | Total
-                                Comments: {dummyComments.length} | Total Users:{" "}
-                                {dummyUsers.length}
+                                Total Posts: {postCount} | Total Comments:{" "}
+                                {commentCount} | Total Users: {userCount}
                             </p>
                         </div>
                     </div>

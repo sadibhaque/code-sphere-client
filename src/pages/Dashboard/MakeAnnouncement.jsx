@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import axios from "axios/unsafe/axios.js";
+import { toast } from "sonner";
 
 export default function MakeAnnouncement() {
     const [formData, setFormData] = useState({
@@ -66,15 +68,17 @@ export default function MakeAnnouncement() {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        const newErrors = validateForm();
+        console.log(formData);
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
-
-        console.log("New Announcement Data:", formData);
-        alert("Announcement made successfully!");
+        axios
+            .post("http://localhost:3000/announcements", {
+                title: formData.title,
+                description: formData.description,
+            })
+            .then(() => {
+                toast.success("Announcement made successfully!");
+                console.log("done");
+            });
 
         // Reset form
         setFormData({
@@ -88,34 +92,6 @@ export default function MakeAnnouncement() {
 
     return (
         <form onSubmit={onSubmit} className="grid gap-6">
-            <div className="grid gap-2">
-                <Label htmlFor="authorImage">Author Image URL</Label>
-                <Input
-                    id="authorImage"
-                    name="authorImage"
-                    type="url"
-                    value={formData.authorImage}
-                    onChange={handleInputChange}
-                    disabled
-                />
-                {errors.authorImage && (
-                    <p className="text-red-500 text-sm">{errors.authorImage}</p>
-                )}
-            </div>
-            <div className="grid gap-2">
-                <Label htmlFor="authorName">Author Name</Label>
-                <Input
-                    id="authorName"
-                    name="authorName"
-                    type="text"
-                    value={formData.authorName}
-                    onChange={handleInputChange}
-                    disabled
-                />
-                {errors.authorName && (
-                    <p className="text-red-500 text-sm">{errors.authorName}</p>
-                )}
-            </div>
             <div className="grid gap-2">
                 <Label htmlFor="title">Announcement Title</Label>
                 <Input

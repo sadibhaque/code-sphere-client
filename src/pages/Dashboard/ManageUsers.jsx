@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Pagination,
     PaginationContent,
@@ -18,110 +18,28 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import axios from "axios/unsafe/axios.js";
 
-// Dummy users data
-const dummyUsers = [
-    {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        subscriptionStatus: "Premium",
-        isAdmin: false,
-    },
-    {
-        id: "2",
-        name: "Jane Smith",
-        email: "jane@example.com",
-        subscriptionStatus: "Free",
-        isAdmin: true,
-    },
-    {
-        id: "3",
-        name: "Bob Johnson",
-        email: "bob@example.com",
-        subscriptionStatus: "Premium",
-        isAdmin: false,
-    },
-    {
-        id: "4",
-        name: "Alice Brown",
-        email: "alice@example.com",
-        subscriptionStatus: "Free",
-        isAdmin: false,
-    },
-    {
-        id: "5",
-        name: "Charlie Wilson",
-        email: "charlie@example.com",
-        subscriptionStatus: "Premium",
-        isAdmin: false,
-    },
-    {
-        id: "6",
-        name: "Diana Prince",
-        email: "diana@example.com",
-        subscriptionStatus: "Free",
-        isAdmin: false,
-    },
-    {
-        id: "7",
-        name: "Eve Adams",
-        email: "eve@example.com",
-        subscriptionStatus: "Premium",
-        isAdmin: false,
-    },
-    {
-        id: "8",
-        name: "Frank White",
-        email: "frank@example.com",
-        subscriptionStatus: "Free",
-        isAdmin: false,
-    },
-    {
-        id: "9",
-        name: "Grace Lee",
-        email: "grace@example.com",
-        subscriptionStatus: "Premium",
-        isAdmin: false,
-    },
-    {
-        id: "10",
-        name: "Henry Green",
-        email: "henry@example.com",
-        subscriptionStatus: "Free",
-        isAdmin: false,
-    },
-    {
-        id: "11",
-        name: "Ivy King",
-        email: "ivy@example.com",
-        subscriptionStatus: "Premium",
-        isAdmin: false,
-    },
-    {
-        id: "12",
-        name: "Jack Black",
-        email: "jack@example.com",
-        subscriptionStatus: "Free",
-        isAdmin: false,
-    },
-];
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [users, setUsers] = useState(dummyUsers);
-    const usersPerPage = 10; // 10 users per page as per challenge task
+    const [users, setUsers] = useState([]);
+    const usersPerPage = 10;
 
-    const filteredUsers = users.filter((user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    useEffect(() => {
+        axios.get("http://localhost:3000/get-all-users").then((response) => {
+            setUsers(response.data);
+            console.log(response.data);
+        });
+    }, []);
+
 
     // Pagination logic
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(users.length / usersPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -170,18 +88,18 @@ export default function ManageUsers() {
                         currentUsers.map((user) => (
                             <TableRow key={user.id}>
                                 <TableCell className="font-medium">
-                                    {user.name}
+                                    {user.username}
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.subscriptionStatus}</TableCell>
+                                <TableCell>{user.badge}</TableCell>
                                 <TableCell className="flex justify-center">
                                     <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={() => handleMakeAdmin(user.id)}
-                                        disabled={user.isAdmin}
+                                        disabled={user.role === "admin"}
                                     >
-                                        {user.isAdmin ? "Admin" : "Make Admin"}
+                                        {user.role === "admin" ? "Admin" : "Make Admin"}
                                     </Button>
                                 </TableCell>
                             </TableRow>
