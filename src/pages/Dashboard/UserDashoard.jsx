@@ -12,6 +12,7 @@ import PostCard from "../../components/PostCard";
 import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
 import axios from "../../../node_modules/axios/lib/axios";
+import { useNavigate } from "react-router";
 
 // const posts = [
 //     {
@@ -147,16 +148,20 @@ import axios from "../../../node_modules/axios/lib/axios";
 // ];
 
 export default function UserDashboard() {
-    
     const { user } = useAuth();
     const userHook = useUser(user);
-    
+    const navigate = useNavigate();
+
     const [posts, setPosts] = useState([]);
     useEffect(() => {
         axios.get("http://localhost:3000/posts").then((response) => {
             setPosts(response.data);
         });
     }, []);
+
+    if (userHook?.role !== "user") {
+        navigate("/dashboard/admin");
+    }
 
     // Filter dummy posts by current user's email (dummy logic)
     const recentPosts = posts

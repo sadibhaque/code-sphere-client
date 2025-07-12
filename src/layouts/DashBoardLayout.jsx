@@ -22,33 +22,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
 import ManageUsers from "../pages/Dashboard/ManageUsers";
+import useUser from "../hooks/useUser";
+import useAuth from "../hooks/useAuth";
 
-export default function DashBoardLayout({ children }) {
+export default function DashBoardLayout() {
     const { pathname } = useLocation();
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-    // const router = useNavigate();
-
-    const user = {
-        name: "mendax",
-        email: "mendax@example.com",
-        badge: "bronze",
-    };
-
-    // useEffect(() => {
-    //     // Dummy authentication check for dashboard access
-    //     if (!user?.isLoggedIn) {
-    //         router("/login");
-    //     }
-    // }, [user, router]);
-
-    // if (!user?.isLoggedIn) {
-    //     return (
-    //         <div className="flex items-center justify-center min-h-[calc(100vh-14rem)]">
-    //             <p>Redirecting to login...</p>
-    //         </div>
-    //     );
-    // }
+    const { user } = useAuth();
+    const userHook = useUser(user);
 
     const userNavItems = [
         { to: "/dashboard/user", icon: User, label: "My Profile" },
@@ -80,7 +62,7 @@ export default function DashBoardLayout({ children }) {
     ];
 
     // const navItems = user.isAdmin ? adminNavItems : userNavItems;
-    const navItems = userNavItems;
+    const navItems = userHook?.role === "admin" ? adminNavItems : userNavItems;
 
     return (
         <div>

@@ -19,6 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import useUser from "../../hooks/useUser";
+import { useNavigate } from "react-router";
+import useAuth from "../../hooks/useAuth";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
@@ -68,15 +71,12 @@ export default function AdminDashboard() {
         "Tutorial",
     ]);
 
-    const user = {
-        name: "mendax",
-        email: "mendax@example.com",
-        badge: "bronze",
-        isAdmin: true, // Set to true for admin access
-    };
+    const { user } = useAuth();
+    const userHook = useUser(user);
+    const navigate = useNavigate();
 
-    if (!user || !user.isAdmin) {
-        return <p>Access Denied. Only admins can view this page.</p>;
+    if (userHook?.role !== "admin") {
+        navigate("/dashboard/user");
     }
 
     // Dummy data for pie chart
@@ -126,14 +126,16 @@ export default function AdminDashboard() {
                         <Avatar className="h-24 w-24">
                             <AvatarImage
                                 src={user.image || "/placeholder-user.jpg"}
-                                alt={user.name}
+                                alt={user.displayName}
                             />
                             <AvatarFallback className="text-4xl">
-                                {user.name.charAt(0)}
+                                {user.displayName.charAt(0)}
                             </AvatarFallback>
                         </Avatar>
                         <div className="grid gap-1">
-                            <p className="text-2xl font-bold">{user.name}</p>
+                            <p className="text-2xl font-bold">
+                                {user.displayName}
+                            </p>
                             <p className="text-muted-foreground">
                                 {user.email}
                             </p>
