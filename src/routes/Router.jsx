@@ -37,6 +37,10 @@ const router = createBrowserRouter([
                 },
             },
             {
+                path: "/comment-report/:id",
+                
+            },
+            {
                 path: "/membership",
                 element: (
                     <PrivateRoute>

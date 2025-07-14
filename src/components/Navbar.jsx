@@ -29,7 +29,7 @@ export default function Navbar() {
             setIsLoggedIn(true);
         }
         axios
-            .get("http://localhost:3000/announcements/count")
+            .get("http://localhost:3000/announcements-count")
             .then((response) => {
                 const totalAnnouncements = response.data.totalAnnouncements;
                 setAnnouncementCount(totalAnnouncements);

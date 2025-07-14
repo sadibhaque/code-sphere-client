@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Card,
     CardContent,
@@ -22,12 +22,11 @@ import { Badge } from "@/components/ui/badge";
 import useUser from "../../hooks/useUser";
 import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
-import axios from "axios/unsafe/axios.js";
+import axios from "axios";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
-
 
 export default function AdminDashboard() {
     const [newTag, setNewTag] = useState("");
@@ -47,31 +46,72 @@ export default function AdminDashboard() {
         navigate("/dashboard/user");
     }
 
-    useQuery(["postsCount"], () =>
-        axios.get("http://localhost:3000/posts/count").then((response) => {
+    useQuery({
+        queryKey: ["postCount"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:3000/posts-count"
+            );
             setPostCount(response.data.totalPosts);
-        })
-    );
+            return response.data; // Return the data explicitly
+        },
+    });
 
-    useQuery(["usersCount"], () =>
-        axios.get("http://localhost:3000/users-count").then((response) => {
+    useQuery({
+        queryKey: ["usersCount"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:3000/users-count"
+            );
             setUserCount(response.data.totalUsers);
-        })
-    );
+            return response.data; // Return the data explicitly
+        },
+    });
 
-    useQuery(["commentsCount"], () =>
-        axios.get("http://localhost:3000/comments/count").then((response) => {
+    useQuery({
+        queryKey: ["commentsCount"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:3000/comments-count"
+            );
             setCommentCount(response.data.totalComments);
-        })
-    );
+            return response.data; // Return the data explicitly
+        },
+    });
 
-    useQuery(["tags"], () =>
-        axios.get("http://localhost:3000/tags").then((response) => {
-            const fetchedTags = response.data[0]?.tagList || [];
-            setTagsId(response.data[0]?._id);
-            setTags(fetchedTags);
-        })
-    );
+    useQuery({
+        queryKey: ["tags"],
+        queryFn: async () => {
+            try {
+                const response = await axios.get("http://localhost:3000/tags");
+                let fetchedTags = [];
+
+                if (response.data && response.data.length > 0) {
+                    // Check if tagList is a string that needs to be parsed
+                    if (typeof response.data[0]?.tagList === "string") {
+                        try {
+                            fetchedTags = JSON.parse(response.data[0].tagList);
+                        } catch (parseError) {
+                            console.error("Error parsing tagList:", parseError);
+                            fetchedTags = [];
+                        }
+                    } else if (Array.isArray(response.data[0]?.tagList)) {
+                        // If it's already an array, use it directly
+                        fetchedTags = response.data[0].tagList;
+                    }
+
+                    setTagsId(response.data[0]?._id);
+                }
+
+                setTags(fetchedTags);
+                return response.data;
+            } catch (error) {
+                console.error("Error fetching tags:", error);
+                toast.error("Failed to load tags");
+                return [];
+            }
+        },
+    });
 
     // data for pie chart
     const chartData = [
@@ -90,7 +130,7 @@ export default function AdminDashboard() {
         return null;
     };
 
-    const onAddTag = (e) => {
+    const onAddTag = async (e) => {
         e.preventDefault();
         const trimmedTag = newTag.trim();
         const error = validateTag(trimmedTag);
@@ -100,17 +140,30 @@ export default function AdminDashboard() {
             return;
         }
 
-        setTags([...tags, trimmedTag]);
-
-        // console.log(tags);
-
-        axios.put(`http://localhost:3000/tags/${tagsId}`, {
-            tagList: [...tags, trimmedTag],
-        });
-
+        // Update the local state first for immediate UI feedback
+        const updatedTags = [...tags, trimmedTag];
+        setTags(updatedTags);
         setNewTag("");
-        setErrors({});
-        toast.success(`Tag "${trimmedTag}" added successfully!`);
+
+        try {
+            if (!tagsId) {
+                toast.error("Cannot update tags: Tag document ID not found");
+                return;
+            }
+
+            // Send update to the server
+            await axios.put(`http://localhost:3000/tags/${tagsId}`, {
+                tagList: updatedTags,
+            });
+
+            toast.success(`Tag "${trimmedTag}" added successfully!`);
+            setErrors({});
+        } catch (error) {
+            console.error("Error updating tags:", error);
+            toast.error("Failed to save tag. Please try again.");
+            // Rollback the local state on error
+            setTags(tags);
+        }
     };
 
     return (

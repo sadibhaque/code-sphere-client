@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Pagination,
     PaginationContent,
@@ -18,18 +18,29 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import axios from "axios/unsafe/axios.js";
+import axios from "axios";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [users, setUsers] = useState([]);
     const usersPerPage = 10;
 
-    const { data: users = [] } = useQuery(["users"], async () => {
-        const response = await axios.get("http://localhost:3000/get-all-users");
-        return response.data;
+    const { data = [] } = useQuery({
+        queryKey: ["users"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:3000/get-all-users"
+            );
+            return response.data;
+        },
     });
+
+    useEffect(() => {
+        setUsers(data);
+    }, [data]);
 
     // Pagination logic
     const indexOfLastUser = currentPage * usersPerPage;
@@ -39,13 +50,25 @@ export default function ManageUsers() {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    const handleMakeAdmin = (userId) => {
-        setUsers((prevUsers) =>
-            prevUsers.map((user) =>
-                user.id === userId ? { ...user, isAdmin: true } : user
-            )
-        );
-        alert(`User with ID ${userId} is now an admin!`);
+    const handleMakeAdmin = async (userId) => {
+        try {
+            // Make API call to update user role
+            await axios.patch(`http://localhost:3000/users/${userId}/role`, {
+                role: "admin",
+            });
+
+            // Update local state
+            setUsers((prevUsers) =>
+                prevUsers.map((user) =>
+                    user._id === userId ? { ...user, role: "admin" } : user
+                )
+            );
+
+            toast.success("User has been promoted to admin");
+        } catch (error) {
+            console.error("Error updating user role:", error);
+            toast.error("Failed to update user role");
+        }
     };
 
     return (
@@ -82,7 +105,7 @@ export default function ManageUsers() {
                         </TableRow>
                     ) : (
                         currentUsers.map((user) => (
-                            <TableRow key={user.id}>
+                            <TableRow key={user._id}>
                                 <TableCell className="font-medium">
                                     {user.username}
                                 </TableCell>
@@ -92,7 +115,9 @@ export default function ManageUsers() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleMakeAdmin(user.id)}
+                                        onClick={() =>
+                                            handleMakeAdmin(user._id)
+                                        }
                                         disabled={user.role === "admin"}
                                     >
                                         {user.role === "admin"

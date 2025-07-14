@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -24,69 +24,144 @@ import {
 import { Input } from "@/components/ui/input";
 import { useLoaderData } from "react-router";
 import useAuth from "../../hooks/useAuth";
+import axios from "axios";
+import { toast } from "sonner";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 export default function PostDetail() {
     const [post] = useState(useLoaderData());
-    const { user } = useAuth;
+    const { user } = useAuth();
     const [commentText, setCommentText] = useState("");
     const [currentUpvotes, setCurrentUpvotes] = useState(post.upvotes);
     const [currentDownvotes, setCurrentDownvotes] = useState(post.downvotes);
     const [userVote, setUserVote] = useState(null); // Tracks user's vote for this post
     const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+    const [comments, setComments] = useState([]);
+    const [loadingComments, setLoadingComments] = useState(false);
 
-    console.log(post);
+    const fetchComments = async () => {
+        if (!post?._id) return;
 
-    const handleCommentSubmit = () => {
+        try {
+            setLoadingComments(true);
+            const response = await axios.get(
+                `http://localhost:3000/comments/${post._id}`
+            );
+            setComments(response.data);
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+            toast.error("Failed to load comments");
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
+    const handleCommentSubmit = async () => {
         if (!user) {
             alert("Please log in to comment.");
             return;
         }
         if (commentText.trim()) {
-            console.log(
-                `Comment on post ${post.id} by ${user.email}: ${commentText}`
-            );
-            alert("Comment submitted successfully!");
-            setCommentText("");
-            setCommentsCount((prev) => prev + 1);
-            // In a real app, this would send comment to backend and update comments count
+            try {
+                const commentData = {
+                    postId: post._id,
+                    postTitle: post.title,
+                    userId: user.uid,
+                    userEmail: user.email,
+                    userName: user.displayName,
+                    userImage: user.photoURL,
+                    text: commentText,
+                    createdAt: new Date().toISOString(),
+                };
+
+                await axios.post("http://localhost:3000/comments", commentData);
+
+                console.log(
+                    `Comment on post ${post._id} by ${user.email}: ${commentText}`
+                );
+                setCommentText("");
+                setCommentsCount((prev) => prev + 1);
+                toast.success("Comment added successfully!");
+                fetchComments(); // Refresh comments after adding a new one
+            } catch (error) {
+                console.error("Error posting comment:", error);
+                toast.error("Failed to post comment. Please try again.");
+            }
         }
     };
 
-    const handleVote = (type) => {
+    const handleVote = async (type) => {
         if (!user) {
-            alert("Please log in to vote.");
+            toast.error("Please log in to vote.");
             return;
         }
 
-        if (type === "up") {
-            if (userVote === "up") {
-                // User un-upvoted
-                setCurrentUpvotes(currentUpvotes - 1);
-                setUserVote(null);
-            } else {
-                setCurrentUpvotes(currentUpvotes + 1);
-                if (userVote === "down") {
-                    setCurrentDownvotes(currentDownvotes - 1);
-                }
-                setUserVote("up");
-            }
-        } else {
-            // type === "down"
-            if (userVote === "down") {
-                // User un-downvoted
-                setCurrentDownvotes(currentDownvotes - 1);
-                setUserVote(null);
-            } else {
-                setCurrentDownvotes(currentDownvotes + 1);
+        try {
+            // Calculate vote changes
+            let updatedUpvotes = currentUpvotes;
+            let updatedDownvotes = currentDownvotes;
+            let newVoteState = type;
+
+            if (type === "up") {
                 if (userVote === "up") {
-                    setCurrentUpvotes(currentUpvotes - 1);
+                    // User canceling upvote
+                    updatedUpvotes--;
+                    newVoteState = null;
+                } else {
+                    // User adding upvote (and removing downvote if present)
+                    updatedUpvotes++;
+                    if (userVote === "down") {
+                        updatedDownvotes--;
+                    }
                 }
-                setUserVote("down");
+            } else if (type === "down") {
+                if (userVote === "down") {
+                    // User canceling downvote
+                    updatedDownvotes--;
+                    newVoteState = null;
+                } else {
+                    // User adding downvote (and removing upvote if present)
+                    updatedDownvotes++;
+                    if (userVote === "up") {
+                        updatedUpvotes--;
+                    }
+                }
             }
+
+            // Update UI optimistically
+            setCurrentUpvotes(updatedUpvotes);
+            setCurrentDownvotes(updatedDownvotes);
+            setUserVote(newVoteState);
+
+            // Send vote to server
+            await axios.post(`http://localhost:3000/posts/${post._id}/vote`, {
+                userId: user.uid,
+                userEmail: user.email,
+                voteType: type,
+                previousVote: userVote,
+            });
+        } catch (error) {
+            console.error(`Error voting ${type} on post:`, error);
+            toast.error(`Failed to register your vote. Please try again.`);
+
+            // Revert UI state on error
+            setUserVote(userVote);
+            setCurrentUpvotes(currentUpvotes);
+            setCurrentDownvotes(currentDownvotes);
         }
-        console.log(`User ${user.email} voted ${type} on post ${post.id}`);
-        // In a real app, this would update vote counts in backend
     };
+
+    // We'll track votes only in client state as per requirement
 
     const handleShare = (platform) => {
         const shareUrl = `https://example.com/post/${post.id}`;
@@ -109,12 +184,10 @@ export default function PostDetail() {
         }
     };
 
-    const handleViewComments = () => {
-        alert(`Viewing all ${commentsCount} comments for "${post.title}"`);
-        // In a real app, this would navigate to a comments page
-    };
-
-    console.log(user);
+    // const handleViewComments = () => {
+    //     alert(`Viewing all ${commentsCount} comments for "${post.title}"`);
+    //     // In a real app, this would navigate to a comments page
+    // };
 
     return (
         <div className="max-w-4xl px-5 lg:px-0 mx-auto my-10">
@@ -225,21 +298,94 @@ export default function PostDetail() {
                         onChange={(e) => setCommentText(e.target.value)}
                         disabled={!user}
                     />
-                    <Button
-                        onClick={handleCommentSubmit}
-                        disabled={!user || !commentText.trim()}
-                    >
+                    <Button onClick={handleCommentSubmit} disabled={!user}>
                         Comment
                     </Button>
                 </div>
                 {/* Button to view all comments */}
-                <Button
-                    variant="link"
-                    onClick={handleViewComments}
-                    className="text-sm p-0 h-auto"
+                <Dialog
+                    onOpenChange={(open) => {
+                        if (open) fetchComments();
+                    }}
                 >
-                    View all {commentsCount} comments
-                </Button>
+                    <DialogTrigger asChild>
+                        <Button variant="link" className="text-sm p-0 h-auto">
+                            View all {commentsCount} comments
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>
+                                Comments on "{post.title}"
+                            </DialogTitle>
+                            <DialogDescription>
+                                {commentsCount} comments for this post
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="py-4 space-y-4">
+                            {loadingComments ? (
+                                <div className="text-center py-6">
+                                    Loading comments...
+                                </div>
+                            ) : comments.length === 0 ? (
+                                <div className="text-center py-6 text-muted-foreground">
+                                    No comments yet
+                                </div>
+                            ) : (
+                                comments.map((comment) => (
+                                    <div
+                                        key={comment._id}
+                                        className="border-b pb-3"
+                                    >
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage
+                                                    src={
+                                                        comment.userImage ||
+                                                        "/placeholder.svg"
+                                                    }
+                                                    alt={comment.userName}
+                                                />
+                                                <AvatarFallback>
+                                                    {comment.userName?.charAt(
+                                                        0
+                                                    ) || "U"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-medium text-sm">
+                                                    {comment.userName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {new Date(
+                                                        comment.createdAt
+                                                    ).toLocaleString("en-US", {
+                                                        hour: "numeric",
+                                                        minute: "numeric",
+                                                        hour12: true,
+                                                        day: "numeric",
+                                                        month: "short",
+                                                        year: "numeric",
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm pl-10">
+                                            {comment.text}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline">Close</Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
