@@ -42,6 +42,7 @@ const CommentReport = () => {
         const data = {
             commentId: comment._id,
             reportFeedback: reportFeedback,
+            text: comment.text,
             feedbackType: feedbackType,
             postId: comment.postId,
             reporterId: user._id,

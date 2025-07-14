@@ -160,9 +160,9 @@ export default function UserDashboard() {
                 .then((response) => response.data),
     });
 
-    if (userHook?.role !== "user") {
-        navigate("/dashboard/admin");
-    }
+    // if (userHook?.role !== "user") {
+    //     navigate("/dashboard/admin");
+    // }
 
     // Filter dummy posts by current user's email (dummy logic)
     const recentPosts = posts

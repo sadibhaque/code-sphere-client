@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useLocation } from "react-router";
 import { cn } from "@/lib/utils";
 import {
@@ -18,7 +18,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import UserDashboard from "../pages/Dashboard/UserDashoard";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
 import ManageUsers from "../pages/Dashboard/ManageUsers";
@@ -31,6 +31,7 @@ export default function DashBoardLayout() {
 
     const { user } = useAuth();
     const userHook = useUser(user);
+    const navigate = useNavigate()
 
     const userNavItems = [
         { to: "/dashboard/user", icon: User, label: "My Profile" },
@@ -60,6 +61,15 @@ export default function DashBoardLayout() {
             label: "Make Announcement",
         },
     ];
+
+
+    useEffect(() => {
+        if (userHook?.role === "admin") {
+            navigate("/dashboard/admin");
+        } else {
+            navigate("/dashboard/user");
+        }
+    }, [userHook]);
 
     // const navItems = user.isAdmin ? adminNavItems : userNavItems;
     const navItems = userHook?.role === "admin" ? adminNavItems : userNavItems;
