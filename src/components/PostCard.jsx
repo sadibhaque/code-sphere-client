@@ -127,7 +127,7 @@ export default function PostCard({ post }) {
                         <span className="font-medium">
                             {post?.downvotes|| 0}
                         </span>
-                    </div>
+                    </div>  
                 </div>
 
                 <Link to={`/post-details/${post?._id || ""}`}>

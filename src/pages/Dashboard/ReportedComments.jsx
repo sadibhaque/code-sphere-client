@@ -7,7 +7,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Pagination,
     PaginationContent,
@@ -16,6 +16,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import axios from "axios";
 
 // Dummy reported comments data
 const dummyReportedComments = [
@@ -131,7 +132,7 @@ const dummyReportedComments = [
 
 export default function ReportedComments() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [comments, setComments] = useState(dummyReportedComments);
+    const [comments, setComments] = useState([]);
     const commentsPerPage = 10; // 10 comments per page for pagination
 
     // Pagination logic
@@ -144,6 +145,17 @@ export default function ReportedComments() {
     const totalPages = Math.ceil(comments.length / commentsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:3000/get-reports")
+            .then((response) => {
+                setComments(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching reported comments:", error);
+            });
+    }, []);
 
     const handleAction = (commentId, action) => {
         if (action === "Delete") {
@@ -198,7 +210,7 @@ export default function ReportedComments() {
                                     {comment.commenterEmail}
                                 </TableCell>
                                 <TableCell className="max-w-[200px] truncate">
-                                    {comment.commentText}
+                                    {comment.reportFeedback}
                                 </TableCell>
                                 <TableCell>{comment.feedback}</TableCell>
                                 <TableCell className="flex justify-center gap-2">

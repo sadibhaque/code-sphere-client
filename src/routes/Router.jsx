@@ -17,6 +17,7 @@ import Login from "../components/Login";
 import AuthProvider from "../providers/AuthProvider";
 import PrivateRoute from "../contexts/PrivateRoute";
 import axios from "../../node_modules/axios/lib/axios";
+import CommentReport from "../pages/CommentReport";
 
 const router = createBrowserRouter([
     {
@@ -29,7 +30,6 @@ const router = createBrowserRouter([
                 element: <PostDetail></PostDetail>,
                 loader: async ({ params }) => {
                     const id = params.id;
-                    console.log(id);
                     const response = await axios.get(
                         `http://localhost:3000/posts/${id}`
                     );
@@ -38,7 +38,18 @@ const router = createBrowserRouter([
             },
             {
                 path: "/comment-report/:id",
-                
+                element: (
+                    <PrivateRoute>
+                        <CommentReport />
+                    </PrivateRoute>
+                ),
+                loader: async ({ params }) => {
+                    const id = params.id;
+                    const response = await axios.get(
+                        `http://localhost:3000/comment/${id}`
+                    );
+                    return response.data;
+                },
             },
             {
                 path: "/membership",

@@ -22,7 +22,7 @@ import {
     MessageSquare,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import axios from "axios";
 import { toast } from "sonner";
@@ -150,6 +150,8 @@ export default function PostDetail() {
                 voteType: type,
                 previousVote: userVote,
             });
+
+            
         } catch (error) {
             console.error(`Error voting ${type} on post:`, error);
             toast.error(`Failed to register your vote. Please try again.`);
@@ -371,9 +373,20 @@ export default function PostDetail() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <p className="text-sm pl-10">
-                                            {comment.text}
-                                        </p>
+                                        <div className="flex w-full justify-between">
+                                            <p className="text-sm pl-10">
+                                                {comment.text}
+                                            </p>
+                                            <Link
+                                                to={`/comment-report/${comment._id}`}
+                                                onClick={() => {
+                                                    console.log(comment._id);
+                                                }}
+                                                className="text-xs text-muted-foreground underline"
+                                            >
+                                                Report Comment
+                                            </Link>
+                                        </div>
                                     </div>
                                 ))
                             )}
