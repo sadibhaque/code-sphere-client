@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -22,61 +22,22 @@ import {
     MessageSquare,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
-// Dummy post data
-const dummyPost = {
-    id: "1",
-    authorImage: "/placeholder-user.jpg",
-    authorName: "Alice Johnson",
-    title: "Getting Started with React Hooks: A Comprehensive Guide",
-    description: `React Hooks have revolutionized the way we write React components. In this comprehensive guide, we'll explore the most commonly used hooks and how they can simplify your React development workflow.
-
-## What are React Hooks?
-
-React Hooks are functions that let you use state and other React features in functional components. They were introduced in React 16.8 and have since become the preferred way to write React components.
-
-## Key Benefits:
-
-1. **Simpler Code**: No need for class components in most cases
-2. **Better Code Reuse**: Custom hooks allow you to share stateful logic
-3. **Easier Testing**: Functional components are generally easier to test
-4. **Better Performance**: Hooks can help optimize re-renders
-
-## Most Common Hooks:
-
-- useState: For managing component state
-- useEffect: For side effects and lifecycle methods
-- useContext: For consuming React context
-- useReducer: For complex state management
-- useMemo: For memoizing expensive calculations
-- useCallback: For memoizing functions
-
-Let's dive into each of these hooks with practical examples and best practices!`,
-    tags: ["React", "JavaScript", "Hooks", "Frontend", "Web Development"],
-    time: "2 hours ago",
-    commentsCount: 24,
-    upvotes: 156,
-    downvotes: 8,
-};
-
-// Dummy user data
-const dummyUser = {
-    isLoggedIn: true,
-    email: "user@example.com",
-    name: "Current User",
-};
+import { useLoaderData } from "react-router";
+import useAuth from "../../hooks/useAuth";
 
 export default function PostDetail() {
-    const [post] = useState(dummyPost);
-    const [user] = useState(dummyUser);
+    const [post] = useState(useLoaderData());
+    const { user } = useAuth;
     const [commentText, setCommentText] = useState("");
     const [currentUpvotes, setCurrentUpvotes] = useState(post.upvotes);
     const [currentDownvotes, setCurrentDownvotes] = useState(post.downvotes);
     const [userVote, setUserVote] = useState(null); // Tracks user's vote for this post
     const [commentsCount, setCommentsCount] = useState(post.commentsCount);
 
+    console.log(post);
+
     const handleCommentSubmit = () => {
-        if (!user?.isLoggedIn) {
+        if (!user) {
             alert("Please log in to comment.");
             return;
         }
@@ -92,7 +53,7 @@ export default function PostDetail() {
     };
 
     const handleVote = (type) => {
-        if (!user?.isLoggedIn) {
+        if (!user) {
             alert("Please log in to vote.");
             return;
         }
@@ -153,39 +114,41 @@ export default function PostDetail() {
         // In a real app, this would navigate to a comments page
     };
 
+    console.log(user);
+
     return (
-        <div className="max-w-4xl mx-auto my-10">
+        <div className="max-w-4xl px-5 lg:px-0 mx-auto my-10">
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12">
                             <AvatarImage
-                                src={post.authorImage || "/placeholder.svg"}
-                                alt={post.authorName}
+                                src={user?.photoURL || "/placeholder.svg"}
+                                alt={user?.displayName}
                             />
                             <AvatarFallback>
-                                {post.authorName.charAt(0)}
+                                {user?.displayName.charAt(0)}
                             </AvatarFallback>
                         </Avatar>
                         <div>
                             <p className="font-medium text-lg">
-                                {post.authorName}
+                                {user?.displayName}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                {post.time}
+                                {post?.createdAt}
                             </p>
                         </div>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <CardTitle className="text-3xl font-bold mb-4">
-                        {post.title}
+                        {post?.title}
                     </CardTitle>
                     <p className="text-muted-foreground whitespace-pre-wrap mb-6">
-                        {post.description}
+                        {post?.content}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-4">
-                        {post.tags.map((tag) => (
+                        {post?.tagList.map((tag) => (
                             <Badge key={tag} variant="secondary">
                                 {tag}
                             </Badge>
@@ -199,7 +162,7 @@ export default function PostDetail() {
                             size="sm"
                             onClick={() => handleVote("up")}
                             className={userVote === "up" ? "text-primary" : ""}
-                            disabled={!user?.isLoggedIn}
+                            disabled={!user}
                         >
                             <ThumbsUp className="h-5 w-5 mr-1" />{" "}
                             {currentUpvotes}
@@ -211,16 +174,12 @@ export default function PostDetail() {
                             className={
                                 userVote === "down" ? "text-destructive" : ""
                             }
-                            disabled={!user?.isLoggedIn}
+                            disabled={!user}
                         >
                             <ThumbsDown className="h-5 w-5 mr-1" />{" "}
                             {currentDownvotes}
                         </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={!user?.isLoggedIn}
-                        >
+                        <Button variant="ghost" size="sm" disabled={!user}>
                             <MessageCircle className="h-5 w-5 mr-1" />{" "}
                             {commentsCount}
                         </Button>
@@ -230,7 +189,7 @@ export default function PostDetail() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={!user?.isLoggedIn}
+                                disabled={!user}
                             >
                                 <Share2 className="h-4 w-4 mr-1" /> Share
                             </Button>
@@ -264,11 +223,11 @@ export default function PostDetail() {
                         placeholder="Write a comment..."
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
-                        disabled={!user?.isLoggedIn}
+                        disabled={!user}
                     />
                     <Button
                         onClick={handleCommentSubmit}
-                        disabled={!user?.isLoggedIn || !commentText.trim()}
+                        disabled={!user || !commentText.trim()}
                     >
                         Comment
                     </Button>

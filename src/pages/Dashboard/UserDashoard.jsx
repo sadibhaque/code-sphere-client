@@ -13,6 +13,7 @@ import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
 import axios from "../../../node_modules/axios/lib/axios";
 import { useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 
 // const posts = [
 //     {
@@ -152,12 +153,13 @@ export default function UserDashboard() {
     const userHook = useUser(user);
     const navigate = useNavigate();
 
-    const [posts, setPosts] = useState([]);
-    useEffect(() => {
-        axios.get("http://localhost:3000/posts").then((response) => {
-            setPosts(response.data);
-        });
-    }, []);
+    const { data: posts = [] } = useQuery({
+        queryKey: ["posts"],
+        queryFn: () =>
+            axios
+                .get("http://localhost:3000/posts")
+                .then((response) => response.data),
+    });
 
     if (userHook?.role !== "user") {
         navigate("/dashboard/admin");

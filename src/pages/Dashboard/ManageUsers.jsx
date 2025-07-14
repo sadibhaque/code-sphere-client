@@ -19,21 +19,17 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import axios from "axios/unsafe/axios.js";
-
+import { useQuery } from "@tanstack/react-query";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [users, setUsers] = useState([]);
     const usersPerPage = 10;
 
-    useEffect(() => {
-        axios.get("http://localhost:3000/get-all-users").then((response) => {
-            setUsers(response.data);
-            console.log(response.data);
-        });
-    }, []);
-
+    const { data: users = [] } = useQuery(["users"], async () => {
+        const response = await axios.get("http://localhost:3000/get-all-users");
+        return response.data;
+    });
 
     // Pagination logic
     const indexOfLastUser = currentPage * usersPerPage;
@@ -99,7 +95,9 @@ export default function ManageUsers() {
                                         onClick={() => handleMakeAdmin(user.id)}
                                         disabled={user.role === "admin"}
                                     >
-                                        {user.role === "admin" ? "Admin" : "Make Admin"}
+                                        {user.role === "admin"
+                                            ? "Admin"
+                                            : "Make Admin"}
                                     </Button>
                                 </TableCell>
                             </TableRow>

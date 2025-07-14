@@ -17,20 +17,29 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import axios from "axios/unsafe/axios.js";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 export default function MyPosts() {
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 10; // 10 posts per page as per challenge task
-    
-    const totalVotes = (post) => post.upvotes - post.downvotes;
-    
-    const [posts, setPosts] = useState([]);
-        useEffect(() => {
-            axios.get("http://localhost:3000/posts").then((response) => {
-                setPosts(response.data);
-            });
-        }, []);
+
+    const totalVotes = (post) => {
+        const upvotes = post?.upvotes || 0;
+        const downvotes = post?.downvotes || 0;
+        return upvotes - downvotes;
+    };
+
+    const { data: postsData = [] } = useQuery({
+        queryKey: ["posts"],
+        queryFn: () =>
+            axios.get("http://localhost:3000/posts").then((res) => res.data),
+    });
+    const [posts, setPosts] = useState(postsData);
+
+    useEffect(() => {
+        setPosts(postsData);
+    }, [postsData]);
 
     // Pagination logic
     const indexOfLastPost = currentPage * postsPerPage;
@@ -40,10 +49,12 @@ export default function MyPosts() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     const handleDelete = (postId) => {
-        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+        setPosts((prevPosts) =>
+            prevPosts.filter((post) => post._id !== postId)
+        );
         alert(
             `Post "${
-                posts.find((p) => p.id === postId)?.title
+                posts.find((p) => p._id === postId)?.title
             }" deleted successfully!`
         );
 
@@ -80,7 +91,7 @@ export default function MyPosts() {
                         </TableRow>
                     ) : (
                         currentPosts.map((post) => (
-                            <TableRow key={post.id}>
+                            <TableRow key={post._id}>
                                 <TableCell className="font-medium">
                                     {post.title}
                                 </TableCell>
@@ -90,7 +101,7 @@ export default function MyPosts() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() =>
-                                            handleViewComments(post.id)
+                                            handleViewComments(post._id)
                                         }
                                     >
                                         <MessageCircle className="h-4 w-4 mr-1" />{" "}
@@ -99,7 +110,7 @@ export default function MyPosts() {
                                     <Button
                                         variant="destructive"
                                         size="sm"
-                                        onClick={() => handleDelete(post.id)}
+                                        onClick={() => handleDelete(post._id)}
                                     >
                                         <Trash2 className="h-4 w-4 mr-1" />{" "}
                                         Delete

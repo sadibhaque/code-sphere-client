@@ -24,38 +24,10 @@ import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import axios from "axios/unsafe/axios.js";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
-// Dummy data
-const dummyPosts = [
-    { id: 1, title: "React Tips", author: "John" },
-    { id: 2, title: "JavaScript Guide", author: "Jane" },
-    { id: 3, title: "CSS Tricks", author: "Bob" },
-    { id: 4, title: "Node.js Basics", author: "Alice" },
-    { id: 5, title: "Database Design", author: "Charlie" },
-];
-
-const dummyComments = [
-    { id: 1, text: "Great post!", postId: 1 },
-    { id: 2, text: "Very helpful", postId: 1 },
-    { id: 3, text: "Thanks for sharing", postId: 2 },
-    { id: 4, text: "Awesome content", postId: 3 },
-    { id: 5, text: "Well explained", postId: 2 },
-    { id: 6, text: "Keep it up!", postId: 4 },
-    { id: 7, text: "Nice work", postId: 5 },
-    { id: 8, text: "Informative", postId: 3 },
-];
-
-const dummyUsers = [
-    { id: 1, name: "John Doe", email: "john@example.com" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com" },
-    { id: 3, name: "Bob Johnson", email: "bob@example.com" },
-    { id: 4, name: "Alice Brown", email: "alice@example.com" },
-    { id: 5, name: "Charlie Wilson", email: "charlie@example.com" },
-    { id: 6, name: "Diana Prince", email: "diana@example.com" },
-    { id: 7, name: "Eve Adams", email: "eve@example.com" },
-];
 
 export default function AdminDashboard() {
     const [newTag, setNewTag] = useState("");
@@ -75,26 +47,31 @@ export default function AdminDashboard() {
         navigate("/dashboard/user");
     }
 
-    useEffect(() => {
+    useQuery(["postsCount"], () =>
         axios.get("http://localhost:3000/posts/count").then((response) => {
-            const totalPosts = response.data.totalPosts;
-            setPostCount(totalPosts);
-        });
-        axios.get("http://localhost:3000/users-count").then((response) => {
-            const totalUsers = response.data.totalUsers;
-            setUserCount(totalUsers);
-        });
-        axios.get("http://localhost:3000/comments/count").then((response) => {
-            const totalComments = response.data.totalComments;
-            setCommentCount(totalComments);
-        });
+            setPostCount(response.data.totalPosts);
+        })
+    );
 
+    useQuery(["usersCount"], () =>
+        axios.get("http://localhost:3000/users-count").then((response) => {
+            setUserCount(response.data.totalUsers);
+        })
+    );
+
+    useQuery(["commentsCount"], () =>
+        axios.get("http://localhost:3000/comments/count").then((response) => {
+            setCommentCount(response.data.totalComments);
+        })
+    );
+
+    useQuery(["tags"], () =>
         axios.get("http://localhost:3000/tags").then((response) => {
             const fetchedTags = response.data[0]?.tagList || [];
             setTagsId(response.data[0]?._id);
             setTags(fetchedTags);
-        });
-    }, []);
+        })
+    );
 
     // data for pie chart
     const chartData = [

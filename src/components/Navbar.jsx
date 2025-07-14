@@ -15,10 +15,11 @@ import { useState, useEffect, useContext } from "react";
 import { cn } from "@/lib/utils";
 import { AuthContext } from "../providers/AuthProvider";
 import { toast } from "sonner";
+import axios from "axios/unsafe/axios.js";
 
 export default function Navbar() {
     const { user, logoutUser } = useContext(AuthContext);
-    const [announcementCount] = useState(2);
+    const [announcementCount, setAnnouncementCount] = useState(2);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,6 +28,12 @@ export default function Navbar() {
         if (user) {
             setIsLoggedIn(true);
         }
+        axios
+            .get("http://localhost:3000/announcements/count")
+            .then((response) => {
+                const totalAnnouncements = response.data.totalAnnouncements;
+                setAnnouncementCount(totalAnnouncements);
+            });
     }, [user]);
 
     useEffect(() => {

@@ -1,31 +1,25 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Megaphone, Calendar, Clock } from "lucide-react";
 import { useState } from "react";
-
-const announcements = [
-    {
-        id: "a1",
-        title: "New Feature: Dark Mode Available!",
-        description:
-            "We've just rolled out dark mode. Check it out in your settings!",
-        date: "2024-07-01",
-    },
-    {
-        id: "a2",
-        title: "Forum Maintenance Scheduled",
-        description:
-            "Scheduled maintenance on July 15th, 2024, from 2 AM to 4 AM UTC.",
-        date: "2024-06-28",
-    },
-];
+import axios from "axios/unsafe/axios.js";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Announcement() {
     const [hoveredAnnouncement, setHoveredAnnouncement] = useState(null);
+
+    const { data: announcements = [] } = useQuery({
+        queryKey: ["announcements"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:3000/announcements"
+            );
+            return response.data;
+        },
+        refetchOnWindowFocus: false,
+    });
 
     if (announcements.length === 0) {
         return null;
@@ -97,24 +91,8 @@ export default function Announcement() {
                                                         <span>
                                                             Posted:{" "}
                                                             {new Date(
-                                                                announcement.date
+                                                                announcement.createdAt
                                                             ).toLocaleDateString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Clock className="h-3 w-3" />
-                                                        <span>
-                                                            {Math.floor(
-                                                                (Date.now() -
-                                                                    new Date(
-                                                                        announcement.date
-                                                                    ).getTime()) /
-                                                                    (1000 *
-                                                                        60 *
-                                                                        60 *
-                                                                        24)
-                                                            )}{" "}
-                                                            days ago
                                                         </span>
                                                     </div>
                                                 </div>
