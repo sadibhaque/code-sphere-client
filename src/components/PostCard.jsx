@@ -15,11 +15,24 @@ import {
     Clock,
     ArrowRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import axios from "axios";
 
 export default function PostCard({ post }) {
     const [isHovered, setIsHovered] = useState(false);
+    const [commentsCount, setCommentsCount] = useState(0);
+
+    useEffect(() => {
+        async function fetchComments() {
+            console.log(post);
+            const response = await axios.get(
+                `http://localhost:3000/comments/${post._id}`
+            );
+            setCommentsCount(response.data.length);
+        }
+        fetchComments();
+    }, [post]);
 
     return (
         <Card
@@ -108,9 +121,7 @@ export default function PostCard({ post }) {
                         <div className="p-1.5 rounded-full bg-muted/50">
                             <MessageCircle className="h-4 w-4" />
                         </div>
-                        <span className="font-medium">
-                            {post?.commentsCount || 0}
-                        </span>
+                        <span className="font-medium">{commentsCount}</span>
                     </div>
                     <div className="flex items-center gap-2 hover:text-green-600 transition-colors">
                         <div className="p-1.5 rounded-full bg-green-50 dark:bg-green-950">
@@ -125,9 +136,9 @@ export default function PostCard({ post }) {
                             <ThumbsDown className="h-4 w-4 text-red-600" />
                         </div>
                         <span className="font-medium">
-                            {post?.downvotes|| 0}
+                            {post?.downvotes || 0}
                         </span>
-                    </div>  
+                    </div>
                 </div>
 
                 <Link to={`/post-details/${post?._id || ""}`}>

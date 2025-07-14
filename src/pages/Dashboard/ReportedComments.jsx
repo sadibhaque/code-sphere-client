@@ -17,123 +17,27 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import axios from "axios";
-
-// Dummy reported comments data
-const dummyReportedComments = [
-    {
-        id: "1",
-        postId: "1",
-        commenterEmail: "user1@example.com",
-        commentText:
-            "This is a very inappropriate comment that was reported by users.",
-        feedback: "Inappropriate content",
-        reported: true,
-    },
-    {
-        id: "2",
-        postId: "2",
-        commenterEmail: "user2@example.com",
-        commentText:
-            "Spam content with lots of promotional links and unwanted content.",
-        feedback: "Spam content",
-        reported: true,
-    },
-    {
-        id: "3",
-        postId: "1",
-        commenterEmail: "user3@example.com",
-        commentText:
-            "Offensive language and personal attacks against other users.",
-        feedback: "Offensive language",
-        reported: true,
-    },
-    {
-        id: "4",
-        postId: "3",
-        commenterEmail: "user4@example.com",
-        commentText:
-            "This comment contains misleading information and false claims.",
-        feedback: "Misinformation",
-        reported: true,
-    },
-    {
-        id: "5",
-        postId: "2",
-        commenterEmail: "user5@example.com",
-        commentText:
-            "Harassment and bullying behavior towards other community members.",
-        feedback: "Harassment",
-        reported: true,
-    },
-    {
-        id: "6",
-        postId: "4",
-        commenterEmail: "user6@example.com",
-        commentText:
-            "Copyright violation with copied content from other sources.",
-        feedback: "Copyright violation",
-        reported: true,
-    },
-    {
-        id: "7",
-        postId: "3",
-        commenterEmail: "user7@example.com",
-        commentText:
-            "Hate speech and discriminatory content that violates community guidelines.",
-        feedback: "Hate speech",
-        reported: true,
-    },
-    {
-        id: "8",
-        postId: "5",
-        commenterEmail: "user8@example.com",
-        commentText:
-            "Off-topic discussion and irrelevant content not related to the post.",
-        feedback: "Off-topic",
-        reported: true,
-    },
-    {
-        id: "9",
-        postId: "4",
-        commenterEmail: "user9@example.com",
-        commentText:
-            "Personal information sharing without consent and privacy violations.",
-        feedback: "Privacy violation",
-        reported: true,
-    },
-    {
-        id: "10",
-        postId: "6",
-        commenterEmail: "user10@example.com",
-        commentText:
-            "Duplicate comment posted multiple times to flood the discussion.",
-        feedback: "Duplicate content",
-        reported: true,
-    },
-    {
-        id: "11",
-        postId: "5",
-        commenterEmail: "user11@example.com",
-        commentText:
-            "Inappropriate promotional content and self-advertising without permission.",
-        feedback: "Unauthorized promotion",
-        reported: true,
-    },
-    {
-        id: "12",
-        postId: "7",
-        commenterEmail: "user12@example.com",
-        commentText:
-            "Trolling behavior and intentional disruption of meaningful discussions.",
-        feedback: "Trolling",
-        reported: true,
-    },
-];
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import Loading from "@/components/Loading";
 
 export default function ReportedComments() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [comments, setComments] = useState([]);
     const commentsPerPage = 10; // 10 comments per page for pagination
+    const [comments, setComments] = useState([]);
+    const [loadingActions, setLoadingActions] = useState({});
+
+    const { data: queriedComments = [], isLoading } = useQuery({
+        queryKey: ["reportedComments"],
+        queryFn: () =>
+            axios
+                .get("http://localhost:3000/get-reports")
+                .then((res) => res.data),
+    });
+
+    useEffect(() => {
+        setComments(queriedComments);
+    }, [queriedComments]);
 
     // Pagination logic
     const indexOfLastComment = currentPage * commentsPerPage;
@@ -146,149 +50,228 @@ export default function ReportedComments() {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    useEffect(() => {
-        axios
-            .get("http://localhost:3000/get-reports")
-            .then((response) => {
-                setComments(response.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching reported comments:", error);
-            });
-    }, []);
+    const handleAction = async (comment, action) => {
+        console.log(comment.commentId, comment._id);
+        try {
+            // Set loading state for this specific comment action
+            setLoadingActions((prev) => ({
+                ...prev,
+                [comment._id + action]: true,
+            }));
 
-    const handleAction = (commentId, action) => {
-        if (action === "Delete") {
-            setComments((prevComments) =>
-                prevComments.filter((comment) => comment.id !== commentId)
-            );
-            alert(`Comment ${commentId} has been deleted!`);
-        } else if (action === "Dismiss") {
-            setComments((prevComments) =>
-                prevComments
-                    .map((comment) =>
-                        comment.id === commentId
-                            ? { ...comment, reported: false }
-                            : comment
+            if (action === "Delete") {
+                // Call API to delete the comment and update status to "deleted"
+                await axios.delete(
+                    `http://localhost:3000/comment-delete/${comment.commentId}`
+                );
+                await axios.patch(
+                    `http://localhost:3000/comment-status/${comment._id}`,
+                    {
+                        status: "deleted",
+                    }
+                );
+
+                toast.success("Comment has been deleted successfully!");
+            } else if (action === "Dismiss") {
+                // Call API to update status to "dismissed"
+                await axios.patch(
+                    `http://localhost:3000/comment-status/${comment._id}`,
+                    {
+                        status: "dismissed",
+                    }
+                );
+
+                // Update local state
+                setComments((prevComments) =>
+                    prevComments.filter(
+                        (comment) => comment._id !== comment._id
                     )
-                    .filter((comment) => comment.reported)
-            );
-            alert(`Report for comment ${commentId} has been dismissed!`);
-        }
+                );
 
-        // Reset to page 1 if current page becomes empty
-        if (currentComments.length === 1 && currentPage > 1) {
-            setCurrentPage(currentPage - 1);
+                toast.success("Report has been dismissed successfully!");
+            }
+
+            // Reset to page 1 if current page becomes empty
+            if (currentComments.length === 1 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
+        } catch (error) {
+            console.error(`Error during ${action} action:`, error);
+            const errorMessage =
+                error.response?.data?.message ||
+                error.message ||
+                `Failed to ${action.toLowerCase()} the comment`;
+            toast.error(errorMessage);
+        } finally {
+            // Clear loading state for this action
+            setLoadingActions((prev) => ({
+                ...prev,
+                [comment._id + action]: false,
+            }));
         }
     };
 
     return (
         <div className="overflow-x-auto">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Commenter Email</TableHead>
-                        <TableHead>Comment Text</TableHead>
-                        <TableHead>Report Feedback</TableHead>
-                        <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {currentComments.length === 0 ? (
-                        <TableRow>
-                            <TableCell
-                                colSpan={4}
-                                className="text-center py-4 text-muted-foreground"
-                            >
-                                No reported comments found.
-                            </TableCell>
-                        </TableRow>
-                    ) : (
-                        currentComments.map((comment) => (
-                            <TableRow key={comment.id}>
-                                <TableCell className="font-medium">
-                                    {comment.commenterEmail}
-                                </TableCell>
-                                <TableCell className="max-w-[200px] truncate">
-                                    {comment.reportFeedback}
-                                </TableCell>
-                                <TableCell>{comment.feedback}</TableCell>
-                                <TableCell className="flex justify-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() =>
-                                            handleAction(comment.id, "Dismiss")
-                                        }
-                                    >
-                                        Dismiss Report
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() =>
-                                            handleAction(comment.id, "Delete")
-                                        }
-                                    >
-                                        Delete Comment
-                                    </Button>
-                                    {/* Add more admin actions as needed */}
-                                </TableCell>
+            {isLoading ? (
+                <div className="flex justify-center items-center h-40">
+                    <Loading />
+                </div>
+            ) : (
+                <div className="w-full max-w-full overflow-x-auto">
+                    <Table className="min-w-[600px]">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Commenter Email</TableHead>
+                                <TableHead>Comment Text</TableHead>
+                                <TableHead>Report Reason</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-center">
+                                    Actions
+                                </TableHead>
                             </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
-            <div className="mt-4">
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    paginate(Math.max(1, currentPage - 1));
-                                }}
-                                className={
-                                    currentPage === 1
-                                        ? "pointer-events-none opacity-50"
-                                        : ""
-                                }
-                            />
-                        </PaginationItem>
-                        {Array.from({ length: totalPages }, (_, i) => (
-                            <PaginationItem key={i}>
-                                <PaginationLink
+                        </TableHeader>
+                        <TableBody>
+                            {currentComments.length === 0 ? (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-center py-4 text-muted-foreground"
+                                    >
+                                        No reported comments found.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                currentComments.map((comment) => (
+                                    <TableRow key={comment._id}>
+                                        <TableCell className="font-medium">
+                                            {comment.commenterEmail ||
+                                                comment.userEmail}
+                                        </TableCell>
+                                        <TableCell className="max-w-[200px] truncate">
+                                            {comment.commentText ||
+                                                comment.text ||
+                                                comment.reportFeedback}
+                                        </TableCell>
+                                        <TableCell>
+                                            {comment.feedbackType}
+                                        </TableCell>
+                                        <TableCell>
+                                            {comment.status || "Pending"}
+                                        </TableCell>
+                                        <TableCell className="flex justify-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={
+                                                    loadingActions[
+                                                        comment.commentId +
+                                                            "Dismiss"
+                                                    ] ||
+                                                    comment.status ===
+                                                        "dismissed" ||
+                                                    comment.status === "deleted"
+                                                }
+                                                onClick={() =>
+                                                    handleAction(
+                                                        comment,
+                                                        "Dismiss"
+                                                    )
+                                                }
+                                            >
+                                                {loadingActions[
+                                                    comment._id + "Dismiss"
+                                                ]
+                                                    ? "Dismissing..."
+                                                    : "Dismiss Report"}
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                id="delete-comment"
+                                                size="sm"
+                                                disabled={
+                                                    loadingActions[
+                                                        comment.commentId +
+                                                            "Delete"
+                                                    ] ||
+                                                    comment.status === "deleted"
+                                                }
+                                                onClick={() =>
+                                                    handleAction(
+                                                        comment,
+                                                        "Delete"
+                                                    )
+                                                }
+                                            >
+                                                {loadingActions[
+                                                    comment.commentId + "Delete"
+                                                ]
+                                                    ? "Deleting..."
+                                                    : "Delete Comment"}
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
+            {!isLoading && comments.length > commentsPerPage && (
+                <div className="mt-4">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
                                     href="#"
-                                    isActive={currentPage === i + 1}
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        paginate(i + 1);
+                                        paginate(Math.max(1, currentPage - 1));
                                     }}
-                                >
-                                    {i + 1}
-                                </PaginationLink>
+                                    className={
+                                        currentPage === 1
+                                            ? "pointer-events-none opacity-50"
+                                            : ""
+                                    }
+                                />
                             </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                            <PaginationNext
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    paginate(
-                                        Math.min(totalPages, currentPage + 1)
-                                    );
-                                }}
-                                className={
-                                    currentPage === totalPages
-                                        ? "pointer-events-none opacity-50"
-                                        : ""
-                                }
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
-            </div>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <PaginationItem key={i}>
+                                    <PaginationLink
+                                        href="#"
+                                        isActive={currentPage === i + 1}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            paginate(i + 1);
+                                        }}
+                                    >
+                                        {i + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        paginate(
+                                            Math.min(
+                                                totalPages,
+                                                currentPage + 1
+                                            )
+                                        );
+                                    }}
+                                    className={
+                                        currentPage === totalPages
+                                            ? "pointer-events-none opacity-50"
+                                            : ""
+                                    }
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -37,6 +37,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import Loading from "../../components/Loading";
 
 export default function PostDetail() {
     const [post] = useState(useLoaderData());
@@ -45,7 +46,7 @@ export default function PostDetail() {
     const [currentUpvotes, setCurrentUpvotes] = useState(post.upvotes);
     const [currentDownvotes, setCurrentDownvotes] = useState(post.downvotes);
     const [userVote, setUserVote] = useState(null); // Tracks user's vote for this post
-    const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+    const [commentsCount, setCommentsCount] = useState(0);
     const [comments, setComments] = useState([]);
     const [loadingComments, setLoadingComments] = useState(false);
 
@@ -58,6 +59,7 @@ export default function PostDetail() {
                 `http://localhost:3000/comments/${post._id}`
             );
             setComments(response.data);
+            setCommentsCount(response.data.length);
         } catch (error) {
             console.error("Error fetching comments:", error);
             toast.error("Failed to load comments");
@@ -66,9 +68,13 @@ export default function PostDetail() {
         }
     };
 
+    useEffect(() => {
+        fetchComments();
+    }, [post._id]);
+
     const handleCommentSubmit = async () => {
         if (!user) {
-            alert("Please log in to comment.");
+            toast.error("Please log in to comment.");
             return;
         }
         if (commentText.trim()) {
@@ -150,8 +156,6 @@ export default function PostDetail() {
                 voteType: type,
                 previousVote: userVote,
             });
-
-            
         } catch (error) {
             console.error(`Error voting ${type} on post:`, error);
             toast.error(`Failed to register your vote. Please try again.`);
@@ -191,6 +195,7 @@ export default function PostDetail() {
     //     // In a real app, this would navigate to a comments page
     // };
 
+    // if (loadingComments) return <Loading></Loading>;
     return (
         <div className="max-w-4xl px-5 lg:px-0 mx-auto my-10">
             <Card>
@@ -321,7 +326,7 @@ export default function PostDetail() {
                                 Comments on "{post.title}"
                             </DialogTitle>
                             <DialogDescription>
-                                {commentsCount} comments for this post
+                                Comments for this post
                             </DialogDescription>
                         </DialogHeader>
 
