@@ -52,6 +52,7 @@ const registerSchema = yup.object().shape({
 
 export default function Register() {
     const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const [usernameStatus, setUsernameStatus] = useState({
@@ -62,7 +63,8 @@ export default function Register() {
     const [checkingUsername, setCheckingUsername] = useState(false);
     const usernameTimeoutRef = useRef(null);
 
-    const { createUser, updateUser, setUser } = useContext(AuthContext);
+    const { createUser, updateUser, setUser, loginWithGoogle } =
+        useContext(AuthContext);
 
     // Initialize react-hook-form
     const {
@@ -186,76 +188,159 @@ export default function Register() {
             }
 
             setIsLoading(true);
-            // console.log("Registration data:", data);
 
-            // Here you will add Firebase authentication later
-            // For now, just logging the data and simulating a successful registration
+            // Regular email/password registration
+            try {
+                const userCredential = await createUser(
+                    data.email,
+                    data.password
+                );
+                const user = userCredential.user;
 
-            createUser(data.email, data.password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    const userInfo = {
-                        email: data.email,
+                const userInfo = {
+                    email: data.email,
+                    role: "user", // default role
+                    username: data.username.toLowerCase(),
+                    badge: "bronze", // default badge
+                    created_at: new Date().toISOString(),
+                    last_log_in: new Date().toISOString(),
+                };
+
+                try {
+                    const response = await fetch(
+                        `https://code-sphere-server-nu.vercel.app/users`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(userInfo),
+                        }
+                    );
+
+                    if (response.ok) {
+                        console.log("User created successfully");
+                    } else {
+                        throw new Error("Failed to create user in database");
+                    }
+
+                    await updateUser({ displayName: data.fullName });
+
+                    setUser({
+                        ...user,
+                        displayName: data.fullName,
                         role: "user", // default role
                         username: data.username.toLowerCase(),
                         badge: "bronze", // default badge
-                        created_at: new Date().toISOString(),
-                        last_log_in: new Date().toISOString(),
-                    };
+                    });
 
-                    fetch(`https://code-sphere-server-nu.vercel.app/users`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(userInfo),
-                    })
-                        .then(() => {
-                            console.log("User created successfully");
-                        })
-                        .catch((error) => {
-                            toast.error(
-                                `User creation failed: ${error.message}`
-                            );
-                        });
-
-                    updateUser({ displayName: data.fullName })
-                        .then(() => {
-                            setUser({
-                                ...user,
-                                displayName: data.fullName,
-                                role: "user", // default role
-                                username: data.username.toLowerCase(),
-                                badge: "bronze", // default badge
-                            });
-                            toast.success("Registration successful");
-                            console.log("Registration successful");
-                            // Reset form after successful registration
-                            reset();
-                            // Navigate to home or previous page
-                            navigate(location?.state?.from || "/");
-                        })
-                        .catch((error) => {
-                            toast.error(
-                                `Profile update failed: ${error.message}`
-                            );
-                            console.error("Profile update error:", error);
-                        });
-                })
-                .catch((error) => {
-                    toast.error(`Registration failed: ${error.message}`);
-                    console.error("Registration error:", error.message);
-                });
-
-            // Reset form after successful registration
-            // reset();
-
-            // TODO: Redirect user after successful registration
+                    toast.success("Registration successful");
+                    console.log("Registration successful");
+                    // Reset form after successful registration
+                    reset();
+                    // Navigate to home or previous page
+                    navigate(location?.state?.from || "/");
+                } catch (error) {
+                    toast.error(
+                        `User creation or profile update failed: ${error.message}`
+                    );
+                    console.error("Error:", error);
+                }
+            } catch (error) {
+                toast.error(`Registration failed: ${error.message}`);
+                console.error("Registration error:", error.message);
+            }
         } catch (error) {
-            toast.error("Registration error:", error.message);
-            // TODO: Show error message to user
+            toast.error(`Registration error: ${error.message}`);
+            console.error("Registration error:", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    // Handle Google registration
+    const handleGoogleRegister = async () => {
+        try {
+            setIsGoogleLoading(true);
+            const result = await loginWithGoogle();
+            const googleUser = result.user;
+
+            // Check if user exists in database
+            const response = await fetch(
+                `https://code-sphere-server-nu.vercel.app/users/${googleUser.email}`
+            );
+
+            if (response.ok) {
+                // User exists, proceed with login
+                const userData = await response.json();
+                setUser({
+                    ...googleUser,
+                    username: userData.username,
+                    role: userData.role || "user",
+                    badge: userData.badge || "bronze",
+                });
+                toast.success("Login successful");
+                navigate(location.state ? location.state : "/");
+            } else {
+                // User doesn't exist, create a new user in the database
+                // Generate a random username based on displayName or email
+                const baseUsername = googleUser.displayName
+                    ? googleUser.displayName.toLowerCase().replace(/\s+/g, "_")
+                    : googleUser.email.split("@")[0];
+                const randomSuffix = Math.floor(
+                    Math.random() * 10000
+                ).toString();
+                const username = `${baseUsername}_${randomSuffix}`;
+
+                // Create new user in database
+                const userInfo = {
+                    email: googleUser.email,
+                    role: "user", // As specified in requirements
+                    username: username,
+                    displayName: googleUser.displayName || "",
+                    photoURL: googleUser.photoURL || "",
+                    last_log_in: new Date().toISOString(),
+                    badge: "bronze", // As specified in requirements
+                    aboutMe: "",
+                    created_at: new Date().toISOString(),
+                };
+
+                try {
+                    const createResponse = await fetch(
+                        `https://code-sphere-server-nu.vercel.app/users`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(userInfo),
+                        }
+                    );
+
+                    if (createResponse.ok) {
+                        // Update user state
+                        setUser({
+                            ...googleUser,
+                            username: username,
+                            role: "admin",
+                            badge: "Gold",
+                        });
+
+                        toast.success("Registration successful!");
+                        navigate(location.state ? location.state : "/");
+                    } else {
+                        throw new Error("Failed to create user account");
+                    }
+                } catch (error) {
+                    console.error("Error creating user:", error);
+                    toast.error("Failed to create account. Please try again.");
+                }
+            }
+        } catch (error) {
+            console.error("Google registration error:", error);
+            toast.error(error.message || "Google registration failed");
+        } finally {
+            setIsGoogleLoading(false);
         }
     };
 
@@ -442,6 +527,37 @@ export default function Register() {
                             </Link>
                         </p>
                     </div>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t"></span>
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                                Or register with
+                            </span>
+                        </div>
+                    </div>
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-12 border-2 flex items-center justify-center gap-2 hover:bg-muted/50 transition-all-smooth"
+                        onClick={handleGoogleRegister}
+                        disabled={isGoogleLoading}
+                    >
+                        {isGoogleLoading ? (
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                <span>Connecting...</span>
+                            </div>
+                        ) : (
+                            <>
+                                <FaGoogle className="h-5 w-5 text-primary" />
+                                <span>Sign up with Google</span>
+                            </>
+                        )}
+                    </Button>
                 </CardContent>
             </Card>
         </div>

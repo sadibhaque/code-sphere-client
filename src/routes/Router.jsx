@@ -14,7 +14,6 @@ import MembershipCard from "../pages/Membership/Membership";
 import AuthLayout from "../layouts/AuthLayout";
 import Register from "../components/Register";
 import Login from "../components/Login";
-import AuthProvider from "../providers/AuthProvider";
 import PrivateRoute from "../contexts/PrivateRoute";
 import axios from "../../node_modules/axios/lib/axios";
 import CommentReport from "../pages/CommentReport";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Card,
     CardContent,
@@ -11,40 +11,35 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Crown, Star, Zap, Shield, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Dummy user data
-const dummyUser = {
-    name: "John Doe",
-    email: "john@example.com",
-    badge: "Bronze", // Can be "Bronze", "Silver", or "Gold"
-    isLoggedIn: true,
-};
+import useAuth from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
+import axios from "axios";
 
 export default function MembershipCard() {
-    const [user, setUser] = useState(dummyUser);
     const [isLoading, setIsLoading] = useState(false);
+    const { user } = useAuth();
+    const userHook = useUser(user);
+    const [status, setStatus] = useState(false);
 
-    const updateBadge = (newBadge) => {
-        setUser((prev) => ({
-            ...prev,
-            badge: newBadge,
-        }));
-    };
+    useEffect(() => {
+        if (userHook?.badge === "gold") {
+            setStatus(true);
+        }
+    }, [userHook]);
 
     const handleBecomeMember = async () => {
         setIsLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        if (user && user.isLoggedIn) {
-            updateBadge("Gold");
-            console.log("User became a Gold member!");
-            alert(
-                "Congratulations! You are now a Gold member! 🎉\nYou can now post more than 5 times and enjoy premium features."
+        try {
+            await axios.patch(
+                `https://code-sphere-server-nu.vercel.app/users/${userHook._id}/badge`,
+                { badge: "gold" }
             );
-        } else {
-            alert("Please log in to become a member.");
+            setStatus(true);
+        } catch (error) {
+            console.error("Failed to update badge", error);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     const features = [
@@ -163,7 +158,7 @@ export default function MembershipCard() {
                 </CardContent>
 
                 <CardFooter className="pt-8 relative">
-                    {user?.badge === "Gold" ? (
+                    {userHook?.badge === "gold" && status ? (
                         <div className="w-full text-center space-y-4">
                             <div className="p-4 rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
                                 <div className="flex items-center justify-center gap-2 mb-2">

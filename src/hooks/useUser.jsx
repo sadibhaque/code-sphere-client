@@ -13,6 +13,7 @@ const useUser = (data) => {
                 role: response.data.role,
                 badge: response.data.badge,
                 aboutMe: response.data.aboutMe,
+                _id: response.data._id,
             });
         });
     }, [data]);
