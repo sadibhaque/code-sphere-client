@@ -20,6 +20,7 @@ import axios from "../../node_modules/axios/lib/axios";
 import CommentReport from "../pages/CommentReport";
 import MyComments from "../pages/MyComments";
 import DashboardRedirect from "../components/DashboardRedirect";
+import TagPage from "../pages/TagPage";
 
 const router = createBrowserRouter([
     {
@@ -28,8 +29,16 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <Home /> },
             {
+                path: "/tag/:tag",
+                element: <TagPage />,
+            },
+            {
                 path: "/post-details/:id",
-                element: <PostDetail></PostDetail>,
+                element: (
+                    <PrivateRoute>
+                        <PostDetail></PostDetail>
+                    </PrivateRoute>
+                ),
                 loader: async ({ params }) => {
                     const id = params.id;
                     const response = await axios.get(

@@ -57,7 +57,7 @@ export default function Tags() {
                         <div className="flex flex-wrap gap-3 justify-center">
                             {tags.map((tag, index) => (
                                 <Link
-                                    href={`/search?tag=${tag}`}
+                                    to={`/tag/${encodeURIComponent(tag)}`}
                                     key={tag}
                                     className="stagger-item"
                                     style={{

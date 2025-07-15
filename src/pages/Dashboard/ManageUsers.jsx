@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -34,6 +35,7 @@ export default function ManageUsers() {
     const { user } = useAuth();
     const userHook = useUser(user);
     const navigate = useNavigate();
+    const axiosSecure = useAxiosSecure();
 
     // Redirect non-admin users to user dashboard
     useEffect(() => {
@@ -45,9 +47,7 @@ export default function ManageUsers() {
     const { data = [] } = useQuery({
         queryKey: ["users"],
         queryFn: async () => {
-            const response = await axios.get(
-                "http://localhost:3000/get-all-users"
-            );
+            const response = await axiosSecure.get("/get-all-users");
             return response.data;
         },
     });

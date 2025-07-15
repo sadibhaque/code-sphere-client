@@ -31,9 +31,15 @@ export default function PostList() {
 
     const sortedPosts = [...posts].sort((a, b) => {
         if (sortBy === "newest") {
-            return new Date(b.time).getTime() - new Date(a.time).getTime();
+            return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            );
         } else {
-            return b.upvotes - b.downvotes - (a.upvotes - a.downvotes);
+            // Popular sorting: (upvotes - downvotes) in descending order
+            const aScore = (a.upvotes || 0) - (a.downvotes || 0);
+            const bScore = (b.upvotes || 0) - (b.downvotes || 0);
+            return bScore - aScore;
         }
     });
 
@@ -45,7 +51,7 @@ export default function PostList() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
-        <section className="w-full py-12 animate-fade-in">
+        <section id="posts" className="w-full py-12 animate-fade-in">
             <div className="container mx-auto px-4 md:px-6">
                 <Card className="border-0 shadow-xl ">
                     <CardHeader>

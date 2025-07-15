@@ -43,8 +43,10 @@ export default function PostDetail() {
     const [post] = useState(useLoaderData());
     const { user } = useAuth();
     const [commentText, setCommentText] = useState("");
-    const [currentUpvotes, setCurrentUpvotes] = useState(post.upvotes);
-    const [currentDownvotes, setCurrentDownvotes] = useState(post.downvotes);
+    const [currentUpvotes, setCurrentUpvotes] = useState(post.upvotes || 0);
+    const [currentDownvotes, setCurrentDownvotes] = useState(
+        post.downvotes || 0
+    );
     const [userVote, setUserVote] = useState(null); // Tracks user's vote for this post
     const [commentsCount, setCommentsCount] = useState(0);
     const [comments, setComments] = useState([]);
@@ -71,6 +73,20 @@ export default function PostDetail() {
     useEffect(() => {
         fetchComments();
     }, [post._id]);
+
+    // Check user's current vote status when component loads
+    useEffect(() => {
+        if (user && post) {
+            // Check if user has voted on this post
+            if (post.upvotedBy?.includes(user.uid)) {
+                setUserVote("up");
+            } else if (post.downvotedBy?.includes(user.uid)) {
+                setUserVote("down");
+            } else {
+                setUserVote(null);
+            }
+        }
+    }, [user, post]);
 
     const handleCommentSubmit = async () => {
         if (!user) {
@@ -113,57 +129,32 @@ export default function PostDetail() {
         }
 
         try {
-            // Calculate vote changes
-            let updatedUpvotes = currentUpvotes;
-            let updatedDownvotes = currentDownvotes;
-            let newVoteState = type;
+            // Send vote to server
+            const response = await axios.patch(
+                `http://localhost:3000/posts/${post._id}/vote`,
+                {
+                    voteType: type,
+                    userId: user.uid,
+                }
+            );
 
-            if (type === "up") {
-                if (userVote === "up") {
-                    // User canceling upvote
-                    updatedUpvotes--;
-                    newVoteState = null;
-                } else {
-                    // User adding upvote (and removing downvote if present)
-                    updatedUpvotes++;
-                    if (userVote === "down") {
-                        updatedDownvotes--;
-                    }
-                }
-            } else if (type === "down") {
-                if (userVote === "down") {
-                    // User canceling downvote
-                    updatedDownvotes--;
-                    newVoteState = null;
-                } else {
-                    // User adding downvote (and removing upvote if present)
-                    updatedDownvotes++;
-                    if (userVote === "up") {
-                        updatedUpvotes--;
-                    }
-                }
+            // Update UI with server response
+            setCurrentUpvotes(response.data.upvotes);
+            setCurrentDownvotes(response.data.downvotes);
+
+            // Update user vote state based on server response
+            if (response.data.hasUpvoted) {
+                setUserVote("up");
+            } else if (response.data.hasDownvoted) {
+                setUserVote("down");
+            } else {
+                setUserVote(null);
             }
 
-            // Update UI optimistically
-            setCurrentUpvotes(updatedUpvotes);
-            setCurrentDownvotes(updatedDownvotes);
-            setUserVote(newVoteState);
-
-            // Send vote to server
-            await axios.post(`http://localhost:3000/posts/${post._id}/vote`, {
-                userId: user.uid,
-                userEmail: user.email,
-                voteType: type,
-                previousVote: userVote,
-            });
+            toast.success(response.data.message);
         } catch (error) {
             console.error(`Error voting ${type} on post:`, error);
             toast.error(`Failed to register your vote. Please try again.`);
-
-            // Revert UI state on error
-            setUserVote(userVote);
-            setCurrentUpvotes(currentUpvotes);
-            setCurrentDownvotes(currentDownvotes);
         }
     };
 

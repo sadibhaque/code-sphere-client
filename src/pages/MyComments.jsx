@@ -34,6 +34,7 @@ import axios from "axios";
 import { useLoaderData } from "react-router";
 import useAuth from "../hooks/useAuth";
 import { toast } from "sonner";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const ReportFeedbackOptions = [
     "Spam or misleading",
@@ -50,12 +51,11 @@ export default function MyComments() {
     const commentsPerPage = 10;
     const [comments, setComments] = useState([]);
     const id = useLoaderData();
+    const axiosSecure = useAxiosSecure();
 
     useEffect(() => {
         async function fetchComments() {
-            const response = await axios.get(
-                `http://localhost:3000/comments/${id}`
-            );
+            const response = await axiosSecure.get(`/comments/${id}`);
             setComments(response.data);
         }
         fetchComments();

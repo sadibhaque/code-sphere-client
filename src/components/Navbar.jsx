@@ -1,5 +1,13 @@
 import { Link } from "react-router";
-import { Code, Bell, LayoutDashboard, LogOut, Menu, X } from "lucide-react";
+import {
+    Code,
+    Bell,
+    LayoutDashboard,
+    LogOut,
+    Menu,
+    X,
+    Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,6 +18,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 // import { useUser } from "@/lib/user-context";
 import { useState, useEffect, useContext } from "react";
 import { cn } from "@/lib/utils";
@@ -20,9 +37,11 @@ import axios from "axios/unsafe/axios.js";
 export default function Navbar() {
     const { user, logoutUser } = useContext(AuthContext);
     const [announcementCount, setAnnouncementCount] = useState(2);
+    const [announcements, setAnnouncements] = useState([]);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -35,6 +54,23 @@ export default function Navbar() {
                 setAnnouncementCount(totalAnnouncements);
             });
     }, [user]);
+
+    // Function to fetch latest announcements for the notification modal
+    const fetchLatestAnnouncements = async () => {
+        try {
+            const response = await axios.get(
+                "http://localhost:3000/announcements"
+            );
+            // Get the latest 4 announcements, sorted by creation date
+            const latest = response.data
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 4);
+            setAnnouncements(latest);
+        } catch (error) {
+            console.error("Failed to fetch announcements:", error);
+            toast.error("Failed to load announcements");
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -61,7 +97,9 @@ export default function Navbar() {
                 isScrolled ? "bg-accent" : "bg-background"
             )}
         >
-            <div className="container mx-auto max-w-10/12 h-16 flex items-center justify-between">
+            <div
+                className="container mx-auto max-w-10/12 h-16 flex items-center justify-between"
+            >
                 <Link
                     to="/"
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
@@ -95,19 +133,92 @@ export default function Navbar() {
 
                     {/* Notification Bell */}
                     {isLoggedIn && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="relative hover:bg-muted/50 transition-all-smooth hover:scale-105"
+                        <Dialog
+                            open={isNotificationOpen}
+                            onOpenChange={setIsNotificationOpen}
                         >
-                            <Bell className="h-5 w-5" />
-                            {announcementCount > 0 && (
-                                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
-                                    {announcementCount}
-                                </span>
-                            )}
-                            <span className="sr-only">Notifications</span>
-                        </Button>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="relative hover:bg-muted/50 transition-all-smooth hover:scale-105"
+                                    onClick={() => {
+                                        setIsNotificationOpen(true);
+                                        fetchLatestAnnouncements();
+                                    }}
+                                >
+                                    <Bell className="h-5 w-5" />
+                                    {announcementCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
+                                            {announcementCount}
+                                        </span>
+                                    )}
+                                    <span className="sr-only">
+                                        Notifications
+                                    </span>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2">
+                                        <Bell className="h-5 w-5" />
+                                        Latest Announcements
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="mt-4">
+                                    {announcements.length > 0 ? (
+                                        <ScrollArea className="h-[400px] pr-4">
+                                            <div className="space-y-4">
+                                                {announcements.map(
+                                                    (announcement) => (
+                                                        <div
+                                                            key={
+                                                                announcement._id
+                                                            }
+                                                            className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                                                        >
+                                                            <div className="space-y-2">
+                                                                <h4 className="font-semibold text-sm leading-tight">
+                                                                    {
+                                                                        announcement.title
+                                                                    }
+                                                                </h4>{" "}
+                                                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                                                    {
+                                                                        announcement.description
+                                                                    }
+                                                                </p>
+                                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                    <Calendar className="h-3 w-3" />
+                                                                    <span>
+                                                                        {new Date(
+                                                                            announcement.createdAt
+                                                                        ).toLocaleDateString()}
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="secondary"
+                                                                        className="text-xs"
+                                                                    >
+                                                                        New
+                                                                    </Badge>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                )}
+                                            </div>
+                                        </ScrollArea>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <Bell className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                                            <p className="text-sm text-muted-foreground">
+                                                No announcements available
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     )}
 
                     {/* User Menu or Login Button */}

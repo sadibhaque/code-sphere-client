@@ -114,6 +114,7 @@ export default function AddPost() {
                 content: formData.description,
                 authorName: user?.displayName || "Anonymous User",
                 authorEmail: user?.email || "",
+                authorImage: user?.photoURL || "",
                 tagList: formData.tagList,
                 upvotes: 0,
                 downvotes: 0,

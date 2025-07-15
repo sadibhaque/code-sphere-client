@@ -58,7 +58,19 @@ export default function PostCard({ post }) {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="h-3 w-3 flex-shrink-0" />
                             <span className="truncate">
-                                {post?.createdAt || "Unknown time"}
+                                {post?.createdAt
+                                    ? new Date(post.createdAt).toLocaleString(
+                                          "en-US",
+                                          {
+                                              year: "numeric",
+                                              month: "short",
+                                              day: "numeric",
+                                              hour: "numeric",
+                                              minute: "2-digit",
+                                              hour12: true,
+                                          }
+                                      )
+                                    : "Unknown time"}
                             </span>
                         </div>
                     </div>

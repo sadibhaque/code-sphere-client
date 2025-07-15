@@ -1,20 +1,20 @@
-import axios from "axios/unsafe/axios.js";
 import { useState, useEffect } from "react";
+import useAxiosSecure from "./useAxiosSecure";
 
 const useUser = (data) => {
     const [userData, setUserData] = useState(null);
+    const axiosSecure = useAxiosSecure();
 
     useEffect(() => {
         if (!data || !data.email) return;
-        axios
-            .get(`http://localhost:3000/users/${data.email}`)
-            .then((response) => {
-                setUserData({
-                    username: response.data.username.toLowerCase(),
-                    role: response.data.role,
-                    badge: response.data.badge,
-                });
+        axiosSecure.get(`/users/${data.email}`).then((response) => {
+            setUserData({
+                username: response.data.username.toLowerCase(),
+                role: response.data.role,
+                badge: response.data.badge,
+                aboutMe: response.data.aboutMe,
             });
+        });
     }, [data]);
 
     return userData;

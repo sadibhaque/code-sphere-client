@@ -27,13 +27,11 @@ const Home = () => {
                 searchTerm={searchTerm}
                 onClearSearch={clearSearch}
             />
-            {!searchTerm && (
-                <>
-                    <Tags />
-                    <Announcement />
-                    <Posts />
-                </>
-            )}
+            <>
+                <Tags />
+                <Announcement />
+                <Posts />
+            </>
         </div>
     );
 };

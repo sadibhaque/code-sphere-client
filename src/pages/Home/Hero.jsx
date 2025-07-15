@@ -140,14 +140,7 @@ export default function Hero({ onSearchResults }) {
                             size="lg"
                             className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all-smooth hover:scale-105 shadow-lg px-8 py-3 text-base rounded-xl"
                         >
-                            Start Exploring
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="border-2 hover:bg-muted/50 transition-all-smooth hover:scale-105 px-8 py-3 text-base rounded-xl bg-transparent"
-                        >
-                            Learn More
+                            <a href="#posts">Start Exploring</a>
                         </Button>
                     </div>
                 </div>
