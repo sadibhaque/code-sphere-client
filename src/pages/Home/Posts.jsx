@@ -54,7 +54,7 @@ export default function PostList() {
 
     return (
         <section id="posts" className="w-full py-12 animate-fade-in">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
                 <Card className="border-0 shadow-xl ">
                     <CardHeader>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

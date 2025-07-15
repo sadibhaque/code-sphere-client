@@ -8,6 +8,7 @@ import {
     Bell,
     MessageSquareWarning,
     Menu,
+    ArrowLeft,
 } from "lucide-react";
 
 import { Outlet } from "react-router";
@@ -27,9 +28,9 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import useUser from "../hooks/useUser";
 import useAuth from "../hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 export default function DashBoardLayout() {
     const { user } = useAuth();
@@ -69,15 +70,15 @@ export default function DashBoardLayout() {
     const dashboardType = userHook?.role === "admin" ? "Admin" : "User";
 
     return (
-        <div className="flex flex-col min-h-screen overflow-hidden">
-            <Navbar />
+        <div className="flex flex-col h-screen overflow-hidden">
+            {/* <Navbar /> */}
             <SidebarProvider>
-                <div className="flex flex-1 min-h-0">
+                <div className="flex flex-1 h-full">
                     <Sidebar className="border-r">
-                        <SidebarHeader className="border-b px-4 sm:px-6 py-4">
+                        <SidebarHeader className="border-b px-4 sm:px-6 py-4 bg-background">
                             <div className="flex items-center gap-2">
                                 <LayoutDashboard className="h-5 w-5 sm:h-6 sm:w-6" />
-                                <h2 className="text-base sm:text-lg font-semibold truncate">
+                                <h2 className="text-base py-1 sm:text-lg font-semibold truncate">
                                     {dashboardType} Dashboard
                                 </h2>
                             </div>
@@ -119,27 +120,32 @@ export default function DashBoardLayout() {
                         </SidebarFooter>
                     </Sidebar>
 
-                    <main className="flex-1 flex flex-col min-w-0">
-                        <header className="border-b px-4 sm:px-6 py-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                            <div className="flex items-center gap-4">
+                    <main className="flex-1 flex flex-col h-full">
+                        <header className="flex-shrink-0 border-b px-4 sm:px-6 py-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                            <div className="flex justify-between items-center gap-4">
                                 <SidebarTrigger className="lg:hidden" />
                                 <h1 className="text-lg sm:text-xl font-semibold truncate">
                                     {navItems.find(
                                         (item) => pathname === item.to
                                     )?.label || `${dashboardType} Dashboard`}
                                 </h1>
+                                <Link to="/">
+                                    <Button className="bg-accent hover:text-black text-amber-50">
+                                       <ArrowLeft></ArrowLeft> Home
+                                    </Button>
+                                </Link>
                             </div>
                         </header>
 
-                        <div className="flex-1 p-4 sm:p-6 overflow-x-hidden">
-                            <div className="max-w-full overflow-x-auto">
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="p-4 sm:p-6">
                                 <Outlet />
                             </div>
                         </div>
                     </main>
                 </div>
             </SidebarProvider>
-            <Footer />
+            {/* <Footer /> */}
         </div>
     );
 }

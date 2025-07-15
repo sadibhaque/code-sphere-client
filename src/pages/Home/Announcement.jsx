@@ -27,8 +27,8 @@ export default function Announcement() {
 
     return (
         <section className="w-full py-12 animate-fade-in">
-            <div className="container mx-auto px-4 md:px-6">
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 hover-lift">
+            <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 hover-lift overflow-hidden">
                     <CardHeader className="pb-6">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-3 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white animate-pulse-slow">
@@ -52,14 +52,14 @@ export default function Announcement() {
                             {announcements.length > 1 ? "s" : ""}
                         </Badge>
                     </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="h-64">
-                            <div className="space-y-4">
+                    <CardContent className="overflow-hidden">
+                        <ScrollArea className="h-68">
+                            <div className="space-y-4 pr-4">
                                 {announcements.map((announcement, index) => (
                                     <div
                                         key={announcement.id}
                                         className={cn(
-                                            "p-4 rounded-xl border border-amber-200/50 dark:border-amber-800/50 transition-all-smooth hover-lift cursor-pointer stagger-item",
+                                            "p-3 sm:p-4 rounded-xl border border-amber-200/50 dark:border-amber-800/50 transition-all-smooth hover-lift cursor-pointer stagger-item",
                                             "bg-gradient-to-r from-background/50 to-amber-50/50 dark:to-amber-950/50",
                                             hoveredAnnouncement ===
                                                 announcement.id &&
@@ -77,12 +77,12 @@ export default function Announcement() {
                                             setHoveredAnnouncement(null)
                                         }
                                     >
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-lg mb-2 text-foreground">
+                                        <div className="flex items-start justify-between gap-2 sm:gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-semibold text-base sm:text-lg mb-2 text-foreground break-words">
                                                     {announcement.title}
                                                 </h3>
-                                                <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                                                <p className="text-muted-foreground text-sm leading-relaxed mb-3 break-words">
                                                     {announcement.description}
                                                 </p>
                                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">

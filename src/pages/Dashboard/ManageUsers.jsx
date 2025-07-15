@@ -25,6 +25,7 @@ import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +90,7 @@ export default function ManageUsers() {
     };
 
     return (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-scroll">
             <div className="flex items-center gap-2 mb-4">
                 <Input
                     placeholder="Search users by name..."
@@ -101,52 +102,102 @@ export default function ManageUsers() {
                     <Search className="h-4 w-4 mr-2" /> Search
                 </Button>
             </div>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>User Name</TableHead>
-                        <TableHead>User Email</TableHead>
-                        <TableHead>Subscription Status</TableHead>
-                        <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {currentUsers.length === 0 ? (
+
+            <div className="hidden lg:block">
+                <Table className="min-w-[600px] table-auto">
+                    <TableHeader>
                         <TableRow>
-                            <TableCell
-                                colSpan={4}
-                                className="text-center py-4 text-muted-foreground"
-                            >
-                                No users found.
-                            </TableCell>
+                            <TableHead>User Name</TableHead>
+                            <TableHead>User Email</TableHead>
+                            <TableHead>Subscription Status</TableHead>
+                            <TableHead className="text-center">
+                                Actions
+                            </TableHead>
                         </TableRow>
-                    ) : (
-                        currentUsers.map((user) => (
-                            <TableRow key={user._id}>
-                                <TableCell className="font-medium">
-                                    {user.username}
-                                </TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.badge}</TableCell>
-                                <TableCell className="flex justify-center">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() =>
-                                            handleMakeAdmin(user._id)
-                                        }
-                                        disabled={user.role === "admin"}
-                                    >
-                                        {user.role === "admin"
-                                            ? "Admin"
-                                            : "Make Admin"}
-                                    </Button>
+                    </TableHeader>
+                    <TableBody>
+                        {currentUsers.length === 0 ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={4}
+                                    className="text-center py-4 text-muted-foreground"
+                                >
+                                    No users found.
                                 </TableCell>
                             </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
+                        ) : (
+                            currentUsers.map((user) => (
+                                <TableRow key={user._id}>
+                                    <TableCell className="font-medium min-w-[150px]">
+                                        {user.username}
+                                    </TableCell>
+                                    <TableCell className="min-w-[200px]">
+                                        {user.email}
+                                    </TableCell>
+                                    <TableCell className="min-w-[150px]">
+                                        {user.badge}
+                                    </TableCell>
+                                    <TableCell className="min-w-[150px]">
+                                        <div className="flex justify-center">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleMakeAdmin(user._id)
+                                                }
+                                                disabled={user.role === "admin"}
+                                            >
+                                                {user.role === "admin"
+                                                    ? "Admin"
+                                                    : "Make Admin"}
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
+            <div className="lg:hidden space-y-4">
+                {/* Mobile Cards */}
+                {currentUsers.length === 0 ? (
+                    <div className="text-center py-4 text-muted-foreground">
+                        No users found.
+                    </div>
+                ) : (
+                    currentUsers.map((user) => (
+                        <div key={user._id} className="border rounded-lg p-4">
+                            <div className="flex justify-between">
+                                <span className="font-medium">Name:</span>
+                                <span>{user.username}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="font-medium">Email:</span>
+                                <span>{user.email}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="font-medium">Status:</span>
+                                <span>{user.badge}</span>
+                            </div>
+                            <div className="flex justify-end mt-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleMakeAdmin(user._id)}
+                                    disabled={user.role === "admin"}
+                                >
+                                    {user.role === "admin"
+                                        ? "Admin"
+                                        : "Make Admin"}
+                                </Button>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+
             <div className="mt-4">
                 <Pagination>
                     <PaginationContent>

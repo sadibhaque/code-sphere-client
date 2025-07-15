@@ -108,7 +108,6 @@ export default function UserDashboard() {
             ) {
                 profileUpdates.photoURL = editForm.profileImage;
             }
-
             await updateUser(profileUpdates);
 
             // Update user profile in the server database

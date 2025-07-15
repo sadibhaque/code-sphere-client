@@ -94,10 +94,10 @@ export default function Navbar() {
         <header
             className={cn(
                 "sticky top-0 z-50 w-full  transition-all-smooth",
-                isScrolled ? "bg-accent" : "bg-background"
+                isScrolled ? "bg-background" : "bg-background"
             )}
         >
-            <div className="container mx-auto max-w-10/12 h-16 flex items-center justify-between">
+            <div className="container mx-auto max-w-10/12 border-b h-16 flex items-center justify-between">
                 <Link
                     to="/"
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
