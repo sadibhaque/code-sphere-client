@@ -18,6 +18,8 @@ import AuthProvider from "../providers/AuthProvider";
 import PrivateRoute from "../contexts/PrivateRoute";
 import axios from "../../node_modules/axios/lib/axios";
 import CommentReport from "../pages/CommentReport";
+import MyComments from "../pages/MyComments";
+import DashboardRedirect from "../components/DashboardRedirect";
 
 const router = createBrowserRouter([
     {
@@ -79,12 +81,32 @@ const router = createBrowserRouter([
         ),
         children: [
             {
+                index: true,
+                element: (
+                    <PrivateRoute>
+                        <DashboardRedirect />
+                    </PrivateRoute>
+                ),
+            },
+            {
                 path: "/dashboard/user",
                 element: (
                     <PrivateRoute>
                         <UserDashboard />
                     </PrivateRoute>
                 ),
+            },
+            {
+                path: "/dashboard/user-comments/:id",
+                element: (
+                    <PrivateRoute>
+                        <MyComments />
+                    </PrivateRoute>
+                ),
+                loader: async ({ params }) => {
+                    const id = params.id;
+                    return id;
+                },
             },
             {
                 path: "/dashboard/user/add-post",

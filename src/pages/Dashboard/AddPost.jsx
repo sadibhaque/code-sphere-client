@@ -19,8 +19,6 @@ export default function AddPost() {
     // Initialize tagList as an empty array
     const [tagList, setTagList] = useState([]);
 
-    const list = [1, 2, 3, 4];
-
     useEffect(() => {
         const fetchTags = async () => {
             try {
@@ -157,87 +155,95 @@ export default function AddPost() {
     };
 
     return (
-        <form onSubmit={onSubmit} className="grid gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            <div className="grid gap-2">
-                <Label htmlFor="title">Post Title</Label>
-                <Input
-                    id="title"
-                    name="title"
-                    type="text"
-                    placeholder="Enter post title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                />
-                {errors.title && (
-                    <p className="text-red-500 text-sm">{errors.title}</p>
-                )}
-            </div>
-            <div className="grid gap-2">
-                <Label htmlFor="description">Post Description</Label>
-                <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="Write your post content here..."
-                    rows={8}
-                    value={formData.description}
-                    onChange={handleInputChange}
-                />
-                {errors.description && (
-                    <p className="text-red-500 text-sm">{errors.description}</p>
-                )}
-            </div>
-            <div className="grid gap-2">
-                <Label htmlFor="tags">Tags</Label>
+        <div className="w-full max-w-4xl mx-auto">
+            <form onSubmit={onSubmit} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
-                    <select
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        value=""
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                handleTagSelect(e.target.value);
-                            }
-                        }}
-                    >
-                        <option value="">Select a tag...</option>
-                        {tagList.map((tag) => (
-                            <option key={tag} value={tag}>
-                                {tag}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="flex flex-wrap gap-2">
-                        {formData.tagList.map((tag) => (
-                            <span
-                                key={tag}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                            >
-                                {tag}
-                                <button
-                                    type="button"
-                                    onClick={() => handleTagRemove(tag)}
-                                    className="ml-1 text-blue-600 hover:text-blue-800"
-                                >
-                                    ×
-                                </button>
-                            </span>
-                        ))}
-                    </div>
+                    <Label htmlFor="title">Post Title</Label>
+                    <Input
+                        id="title"
+                        name="title"
+                        type="text"
+                        placeholder="Enter post title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        className="w-full"
+                    />
+                    {errors.title && (
+                        <p className="text-red-500 text-sm">{errors.title}</p>
+                    )}
                 </div>
-                {errors.tagList && (
-                    <p className="text-red-500 text-sm">{errors.tagList}</p>
-                )}
-            </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Creating Post...
+                <div className="space-y-2">
+                    <Label htmlFor="description">Post Description</Label>
+                    <Textarea
+                        id="description"
+                        name="description"
+                        placeholder="Write your post content here..."
+                        rows={8}
+                        value={formData.description}
+                        onChange={handleInputChange}
+                    />
+                    {errors.description && (
+                        <p className="text-red-500 text-sm">
+                            {errors.description}
+                        </p>
+                    )}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="tags">Tags</Label>
+                    <div className="space-y-2">
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                            value=""
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    handleTagSelect(e.target.value);
+                                }
+                            }}
+                        >
+                            <option value="">Select a tag...</option>
+                            {tagList.map((tag) => (
+                                <option key={tag} value={tag}>
+                                    {tag}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="flex flex-wrap gap-2">
+                            {formData.tagList.map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                >
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleTagRemove(tag)}
+                                        className="ml-1 text-blue-600 hover:text-blue-800"
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
                     </div>
-                ) : (
-                    "Add Post"
-                )}
-            </Button>
-        </form>
+                    {errors.tagList && (
+                        <p className="text-red-500 text-sm">{errors.tagList}</p>
+                    )}
+                </div>
+                <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? (
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Creating Post...
+                        </div>
+                    ) : (
+                        "Add Post"
+                    )}
+                </Button>
+            </form>
+        </div>
     );
 }

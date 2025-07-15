@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import axios from "axios/unsafe/axios.js";
 import { toast } from "sonner";
+import { useNavigate } from "react-router";
+import useAuth from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
 
 export default function MakeAnnouncement() {
     const [formData, setFormData] = useState({
@@ -15,40 +18,16 @@ export default function MakeAnnouncement() {
     });
     const [errors, setErrors] = useState({});
 
-    const validateForm = () => {
-        const newErrors = {};
+    const { user } = useAuth();
+    const userHook = useUser(user);
+    const navigate = useNavigate();
 
-        if (!formData.authorName.trim()) {
-            newErrors.authorName = "Author name is required.";
+    // Redirect non-admin users to user dashboard
+    useEffect(() => {
+        if (userHook?.role && userHook.role !== "admin") {
+            navigate("/dashboard/user", { replace: true });
         }
-
-        if (!formData.title.trim() || formData.title.trim().length < 5) {
-            newErrors.title = "Title must be at least 5 characters.";
-        }
-
-        if (
-            !formData.description.trim() ||
-            formData.description.trim().length < 20
-        ) {
-            newErrors.description =
-                "Description must be at least 20 characters.";
-        }
-
-        if (formData.authorImage && !isValidUrl(formData.authorImage)) {
-            newErrors.authorImage = "Please enter a valid URL.";
-        }
-
-        return newErrors;
-    };
-
-    const isValidUrl = (string) => {
-        try {
-            new URL(string);
-            return true;
-        } catch {
-            return false;
-        }
-    };
+    }, [userHook, navigate]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -91,38 +70,54 @@ export default function MakeAnnouncement() {
     };
 
     return (
-        <form onSubmit={onSubmit} className="grid gap-6">
-            <div className="grid gap-2">
-                <Label htmlFor="title">Announcement Title</Label>
-                <Input
-                    id="title"
-                    name="title"
-                    type="text"
-                    placeholder="Enter announcement title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                />
-                {errors.title && (
-                    <p className="text-red-500 text-sm">{errors.title}</p>
-                )}
+        <div className="max-w-2xl mx-auto p-4 sm:p-6">
+            <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+                    Make Announcement
+                </h1>
+                <p className="text-muted-foreground">
+                    Create a new announcement for all users
+                </p>
             </div>
-            <div className="grid gap-2">
-                <Label htmlFor="description">Announcement Description</Label>
-                <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="Write your announcement content here..."
-                    rows={8}
-                    value={formData.description}
-                    onChange={handleInputChange}
-                />
-                {errors.description && (
-                    <p className="text-red-500 text-sm">{errors.description}</p>
-                )}
-            </div>
-            <Button type="submit" className="w-full">
-                Publish Announcement
-            </Button>
-        </form>
+            <form onSubmit={onSubmit} className="grid gap-6">
+                <div className="grid gap-2">
+                    <Label htmlFor="title">Announcement Title</Label>
+                    <Input
+                        id="title"
+                        name="title"
+                        type="text"
+                        placeholder="Enter announcement title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        className="w-full"
+                    />
+                    {errors.title && (
+                        <p className="text-red-500 text-sm">{errors.title}</p>
+                    )}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="description">
+                        Announcement Description
+                    </Label>
+                    <Textarea
+                        id="description"
+                        name="description"
+                        placeholder="Write your announcement content here..."
+                        rows={8}
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        className="w-full resize-y"
+                    />
+                    {errors.description && (
+                        <p className="text-red-500 text-sm">
+                            {errors.description}
+                        </p>
+                    )}
+                </div>
+                <Button type="submit" className="w-full">
+                    Publish Announcement
+                </Button>
+            </form>
+        </div>
     );
 }

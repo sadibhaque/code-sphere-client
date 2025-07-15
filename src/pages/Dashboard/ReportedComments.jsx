@@ -32,12 +32,26 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router";
+import useAuth from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
 
 export default function ReportedComments() {
     const [currentPage, setCurrentPage] = useState(1);
     const commentsPerPage = 10; // 10 comments per page for pagination
     const [comments, setComments] = useState([]);
     const [loadingActions, setLoadingActions] = useState({});
+
+    const { user } = useAuth();
+    const userHook = useUser(user);
+    const navigate = useNavigate();
+
+    // Redirect non-admin users to user dashboard
+    useEffect(() => {
+        if (userHook?.role && userHook.role !== "admin") {
+            navigate("/dashboard/user", { replace: true });
+        }
+    }, [userHook, navigate]);
 
     const { data: queriedComments = [], isLoading } = useQuery({
         queryKey: ["reportedComments"],
@@ -93,13 +107,6 @@ export default function ReportedComments() {
                     }
                 );
 
-                // Update local state
-                setComments((prevComments) =>
-                    prevComments.filter(
-                        (comment) => comment._id !== comment._id
-                    )
-                );
-
                 toast.success("Report has been dismissed successfully!");
             }
 
@@ -124,20 +131,34 @@ export default function ReportedComments() {
     };
 
     return (
-        <div className="overflow-x-auto">
+        <div className="p-4 sm:p-6">
+            <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+                    Reported Comments
+                </h1>
+                <p className="text-muted-foreground">
+                    Review and manage reported comments
+                </p>
+            </div>
             {isLoading ? (
                 <div className="flex justify-center items-center h-40">
                     <Loading />
                 </div>
             ) : (
-                <div className="w-full max-w-full overflow-x-auto">
-                    <Table className="min-w-[600px]">
+                <div className="w-full max-w-[400px] md:max-w-full lg:max-w-full overflow-x-scroll lg:overflow-x-auto">
+                    <Table className="min-w-[800px]">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Commenter Email</TableHead>
-                                <TableHead>Comment Text</TableHead>
-                                <TableHead>Report Retails</TableHead>
-                                <TableHead className="text-center">
+                                <TableHead className="min-w-[150px]">
+                                    Commenter Email
+                                </TableHead>
+                                <TableHead className="min-w-[200px]">
+                                    Comment Text
+                                </TableHead>
+                                <TableHead className="min-w-[120px]">
+                                    Report Details
+                                </TableHead>
+                                <TableHead className="text-center min-w-[200px]">
                                     Actions
                                 </TableHead>
                             </TableRow>
@@ -146,8 +167,8 @@ export default function ReportedComments() {
                             {currentComments.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
-                                        className="text-center py-4 text-muted-foreground"
+                                        colSpan={4}
+                                        className="text-center py-8 text-muted-foreground"
                                     >
                                         No reported comments found.
                                     </TableCell>
@@ -156,108 +177,121 @@ export default function ReportedComments() {
                                 currentComments.map((comment) => (
                                     <TableRow key={comment._id}>
                                         <TableCell className="font-medium">
-                                            {comment.commenterEmail ||
-                                                comment.userEmail}
+                                            <div className="truncate max-w-[150px]">
+                                                {comment.commenterEmail ||
+                                                    comment.userEmail}
+                                            </div>
                                         </TableCell>
-                                        <TableCell className="max-w-[200px] truncate">
-                                            {comment.text}
+                                        <TableCell>
+                                            <div className="max-w-[200px] truncate">
+                                                {comment.text}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <Dialog>
-                                                <form>
-                                                    <DialogTrigger asChild>
-                                                        <Button variant="outline">
-                                                            View
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-[425px]">
-                                                        <DialogHeader>
-                                                            <DialogTitle className="text-2xl font-semibold">
-                                                                Report Details
-                                                            </DialogTitle>
-                                                            <DialogDescription>
-                                                                <span className="font-semibold text-white">
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[425px] max-w-[95vw]">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-xl sm:text-2xl font-semibold">
+                                                            Report Details
+                                                        </DialogTitle>
+                                                        <DialogDescription className="space-y-2">
+                                                            <div>
+                                                                <span className="font-semibold text-foreground">
                                                                     Report
-                                                                    Reason
+                                                                    Reason:
                                                                 </span>{" "}
-                                                                :{" "}
                                                                 {
                                                                     comment.feedbackType
                                                                 }
-                                                            </DialogDescription>
-                                                            <DialogDescription>
-                                                                <span className="font-semibold text-white">
-                                                                    Details
-                                                                </span>
-                                                                :{" "}
-                                                                {
-                                                                    comment.reportFeedback
-                                                                }
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                    </DialogContent>
-                                                </form>
+                                                            </div>
+                                                            {comment.reportFeedback && (
+                                                                <div>
+                                                                    <span className="font-semibold text-foreground">
+                                                                        Details:
+                                                                    </span>{" "}
+                                                                    {
+                                                                        comment.reportFeedback
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                </DialogContent>
                                             </Dialog>
                                         </TableCell>
-                                        <TableCell className="flex flex-wrap justify-center gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                disabled={
-                                                    loadingActions[
-                                                        comment.commentId +
+                                        <TableCell>
+                                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full sm:w-auto text-xs sm:text-sm"
+                                                    disabled={
+                                                        loadingActions[
+                                                            comment.commentId +
+                                                                "Dismiss"
+                                                        ] ||
+                                                        comment.status ===
+                                                            "dismissed" ||
+                                                        comment.status ===
+                                                            "deleted"
+                                                    }
+                                                    onClick={() =>
+                                                        handleAction(
+                                                            comment,
                                                             "Dismiss"
-                                                    ] ||
-                                                    comment.status ===
-                                                        "dismissed" ||
-                                                    comment.status === "deleted"
-                                                }
-                                                onClick={() =>
-                                                    handleAction(
-                                                        comment,
-                                                        "Dismiss"
-                                                    )
-                                                }
-                                            >
-                                                {comment.status === "dismissed"
-                                                    ? "Report Dismissed"
-                                                    : loadingActions[
-                                                          comment.commentId +
-                                                              "Dismiss"
-                                                      ]
-                                                    ? "Dismissing..."
-                                                    : "Dismiss Report"}
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                id="delete-comment"
-                                                size="sm"
-                                                disabled={
-                                                    loadingActions[
-                                                        comment.commentId +
+                                                        )
+                                                    }
+                                                >
+                                                    {comment.status ===
+                                                    "dismissed"
+                                                        ? "Dismissed"
+                                                        : loadingActions[
+                                                              comment.commentId +
+                                                                  "Dismiss"
+                                                          ]
+                                                        ? "Dismissing..."
+                                                        : "Dismiss"}
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    className="w-full sm:w-auto text-xs sm:text-sm"
+                                                    disabled={
+                                                        loadingActions[
+                                                            comment.commentId +
+                                                                "Delete"
+                                                        ] ||
+                                                        comment.status ===
+                                                            "deleted" ||
+                                                        comment.status ===
+                                                            "dismissed"
+                                                    }
+                                                    onClick={() =>
+                                                        handleAction(
+                                                            comment,
                                                             "Delete"
-                                                    ] ||
-                                                    comment.status ===
-                                                        "deleted" ||
-                                                    comment.status ===
-                                                        "dismissed"
-                                                }
-                                                onClick={() =>
-                                                    handleAction(
-                                                        comment,
-                                                        "Delete"
-                                                    )
-                                                }
-                                            >
-                                                {comment.status === "deleted"
-                                                    ? "Comment Deleted"
-                                                    : loadingActions[
-                                                          comment.commentId +
-                                                              "Delete"
-                                                      ]
-                                                    ? "Deleting..."
-                                                    : "Delete Comment"}
-                                            </Button>
+                                                        )
+                                                    }
+                                                >
+                                                    {comment.status ===
+                                                    "deleted"
+                                                        ? "Deleted"
+                                                        : loadingActions[
+                                                              comment.commentId +
+                                                                  "Delete"
+                                                          ]
+                                                        ? "Deleting..."
+                                                        : "Delete"}
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))

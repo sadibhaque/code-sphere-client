@@ -20,14 +20,13 @@ export default function PostList() {
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 5;
     // const [posts, setPosts] = useState([]);
-    const [totalComments, setTotalComments] = useState(0);
 
     const { data: posts = [] } = useQuery({
         queryKey: ["posts"],
         queryFn: async () => {
             const response = await axios.get("http://localhost:3000/posts");
             return response.data;
-        }
+        },
     });
 
     const sortedPosts = [...posts].sort((a, b) => {

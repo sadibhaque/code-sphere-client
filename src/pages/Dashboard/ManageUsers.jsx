@@ -21,12 +21,26 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+import useAuth from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [users, setUsers] = useState([]);
     const usersPerPage = 10;
+
+    const { user } = useAuth();
+    const userHook = useUser(user);
+    const navigate = useNavigate();
+
+    // Redirect non-admin users to user dashboard
+    useEffect(() => {
+        if (userHook?.role && userHook.role !== "admin") {
+            navigate("/dashboard/user", { replace: true });
+        }
+    }, [userHook, navigate]);
 
     const { data = [] } = useQuery({
         queryKey: ["users"],
