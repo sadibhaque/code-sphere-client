@@ -46,7 +46,7 @@ export default function Hero({ onSearchResults }) {
     ];
 
     return (
-        <section className="relative max-w-11/12 mx-auto my-10 rounded-3xl py-16 md:py-24 lg:py-32 overflow-hidden">
+        <section className="relative lg:max-w-10/12 max-w-11/12 mx-auto my-10 rounded-3xl py-16 md:py-24 lg:py-32 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
                 {/* <div
                     className={`absolute inset-0 bg-[url("data:image/svg+xml,%3Csvg%20width='60'%20height='60'%20viewBox='0%200%2060%2060'%20xmlns='http://www.w3.org/2000/svg'%3E%3Cg%20fill='none'%20fillRule='evenodd'%3E%3Cg%20fill='%239C92AC'%20fillOpacity='0.05'%3E%3Ccircle%20cx='30'%20cy='30'%20r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")] animate-pulse-slow`}
