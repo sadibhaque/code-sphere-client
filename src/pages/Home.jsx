@@ -1,16 +1,39 @@
-import React from 'react';
-import Hero from './Home/Hero';
-import Tags from './Home/Tags';
-import Announcement from './Home/Announcement';
-import Posts from './Home/Posts';
+import React, { useState } from "react";
+import Hero from "./Home/Hero";
+import Tags from "./Home/Tags";
+import Announcement from "./Home/Announcement";
+import Posts from "./Home/Posts";
+import SearchResults from "./Home/SearchResults";
 
 const Home = () => {
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const handleSearchResults = (results, term) => {
+        setSearchResults(results);
+        setSearchTerm(term);
+    };
+
+    const clearSearch = () => {
+        setSearchResults([]);
+        setSearchTerm("");
+    };
+
     return (
         <div>
-            <Hero></Hero>
-            <Tags></Tags>
-            <Announcement></Announcement>
-            <Posts></Posts>
+            <Hero onSearchResults={handleSearchResults} />
+            <SearchResults
+                results={searchResults}
+                searchTerm={searchTerm}
+                onClearSearch={clearSearch}
+            />
+            {!searchTerm && (
+                <>
+                    <Tags />
+                    <Announcement />
+                    <Posts />
+                </>
+            )}
         </div>
     );
 };

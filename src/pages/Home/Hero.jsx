@@ -3,13 +3,40 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, TrendingUp, Users, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import axios from "axios";
+import { toast } from "sonner";
 
-export default function Hero() {
+export default function Hero({ onSearchResults }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
-    const handleSearch = () => {
-        console.log("Searching for:", searchTerm);
+    const handleSearch = async () => {
+        if (!searchTerm.trim()) {
+            toast.error("Please enter a search term");
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const response = await axios.get(
+                `http://localhost:3000/posts/search?tags=${encodeURIComponent(
+                    searchTerm.trim()
+                )}`
+            );
+            onSearchResults(response.data, searchTerm.trim());
+            toast.success(
+                `Found ${
+                    response.data.length
+                } posts matching "${searchTerm.trim()}"`
+            );
+        } catch (error) {
+            console.error("Search error:", error);
+            toast.error("Failed to search posts. Please try again.");
+            onSearchResults([], searchTerm.trim());
+        } finally {
+            setIsSearching(false);
+        }
     };
 
     const stats = [
@@ -56,7 +83,7 @@ export default function Hero() {
                         >
                             <Input
                                 type="text"
-                                placeholder="Search posts by tags, topics, or keywords..."
+                                placeholder="Search posts by tags (e.g., React, JavaScript, CSS, Node.js)..."
                                 className="flex-1 rounded-xl mt-2 ml-2 border-0 bg-transparent text-base px-6 py-4 focus-visible:ring-0 focus-visible:ring-offset-0"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -70,10 +97,11 @@ export default function Hero() {
                             />
                             <Button
                                 onClick={handleSearch}
-                                className="m-2 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all-smooth hover:scale-105 shadow-md rounded-xl"
+                                disabled={isSearching}
+                                className="m-2 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all-smooth hover:scale-105 shadow-md rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Search className="h-5 w-5 mr-2" />
-                                Search
+                                {isSearching ? "Searching..." : "Search"}
                             </Button>
                         </div>
                     </div>
