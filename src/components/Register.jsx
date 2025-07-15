@@ -105,7 +105,7 @@ export default function Register() {
             usernameTimeoutRef.current = setTimeout(() => {
                 // Call API to check if username is available
                 fetch(
-                    `http://localhost:3000/users/check-username?username=${username}`
+                    `https://code-sphere-server-nu.vercel.app/users/check-username?username=${username}`
                 )
                     .then((response) => response.json())
                     .then((data) => {
@@ -166,7 +166,7 @@ export default function Register() {
 
                 // Make one final check if the username is available
                 const response = await fetch(
-                    `http://localhost:3000/users/check-username?username=${username}`
+                    `https://code-sphere-server-nu.vercel.app/users/check-username?username=${username}`
                 );
                 const checkResult = await response.json();
 
@@ -203,7 +203,7 @@ export default function Register() {
                         last_log_in: new Date().toISOString(),
                     };
 
-                    fetch(`http://localhost:3000/users`, {
+                    fetch(`https://code-sphere-server-nu.vercel.app/users`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

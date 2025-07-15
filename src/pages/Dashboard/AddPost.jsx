@@ -22,7 +22,9 @@ export default function AddPost() {
     useEffect(() => {
         const fetchTags = async () => {
             try {
-                const response = await fetch("http://localhost:3000/tags");
+                const response = await fetch(
+                    "https://code-sphere-server-nu.vercel.app/tags"
+                );
                 const data = await response.json();
                 setTagList(data[0].tagList);
             } catch (error) {
@@ -121,13 +123,16 @@ export default function AddPost() {
             };
 
             // Send POST request to the API
-            const response = await fetch("http://localhost:3000/posts", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
-            });
+            const response = await fetch(
+                "https://code-sphere-server-nu.vercel.app/posts",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(postData),
+                }
+            );
 
             const data = await response.json();
 

@@ -31,7 +31,9 @@ export default function ManageUsers() {
     const { data: queryData = [], isLoading } = useQuery({
         queryKey: ["users"],
         queryFn: () =>
-            axios.get("http://localhost:3000/users").then((res) => res.data),
+            axios
+                .get("https://code-sphere-server-nu.vercel.app/users")
+                .then((res) => res.data),
     });
 
     useEffect(() => {
@@ -54,9 +56,12 @@ export default function ManageUsers() {
     const handleToggleUserRole = async (user) => {
         try {
             const newStatus = user.role === "user" ? "admin" : "user";
-            await axios.patch(`http://localhost:3000/users/${user._id}`, {
-                role: newStatus,
-            });
+            await axios.patch(
+                `https://code-sphere-server-nu.vercel.app/users/${user._id}`,
+                {
+                    role: newStatus,
+                }
+            );
 
             // Update local state
             setUsers((prevUsers) =>

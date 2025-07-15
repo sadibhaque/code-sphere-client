@@ -50,7 +50,7 @@ export default function MakeAnnouncement() {
         console.log(formData);
 
         axios
-            .post("http://localhost:3000/announcements", {
+            .post("https://code-sphere-server-nu.vercel.app/announcements", {
                 title: formData.title,
                 description: formData.description,
             })

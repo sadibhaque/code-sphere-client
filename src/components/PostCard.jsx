@@ -27,7 +27,7 @@ export default function PostCard({ post }) {
         async function fetchComments() {
             console.log(post);
             const response = await axios.get(
-                `http://localhost:3000/comments/${post._id}`
+                `https://code-sphere-server-nu.vercel.app/comments/${post._id}`
             );
             setCommentsCount(response.data.length);
         }

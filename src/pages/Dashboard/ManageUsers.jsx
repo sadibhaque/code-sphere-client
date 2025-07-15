@@ -67,9 +67,12 @@ export default function ManageUsers() {
     const handleMakeAdmin = async (userId) => {
         try {
             // Make API call to update user role
-            await axios.patch(`http://localhost:3000/users/${userId}/role`, {
-                role: "admin",
-            });
+            await axios.patch(
+                `https://code-sphere-server-nu.vercel.app/users/${userId}/role`,
+                {
+                    role: "admin",
+                }
+            );
 
             // Update local state
             setUsers((prevUsers) =>

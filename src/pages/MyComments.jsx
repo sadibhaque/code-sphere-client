@@ -87,7 +87,7 @@ export default function MyComments() {
         };
         console.log(comment);
         axios
-            .post("http://localhost:3000/reports", data)
+            .post("https://code-sphere-server-nu.vercel.app/reports", data)
             .then(() => {
                 toast.success("Report submitted successfully!");
                 // Clear the selected feedback for this comment after successful report

@@ -3,7 +3,7 @@ import useAuth from "./useAuth";
 import axios from "axios";
 
 const axiosSecure = axios.create({
-    baseURL: `http://localhost:3000`,
+    baseURL: `https://code-sphere-server-nu.vercel.app`,
 });
 
 const useAxiosSecure = () => {
@@ -31,11 +31,11 @@ const useAxiosSecure = () => {
             if (status === 403) {
                 navigate("/forbidden");
             } else if (status === 401) {
-                // logOut()
-                //     .then(() => {
-                //         navigate("/login");
-                //     })
-                //     .catch(() => {});
+                logOut()
+                    .then(() => {
+                        navigate("/login");
+                    })
+                    .catch(() => {});
             }
 
             return Promise.reject(error);

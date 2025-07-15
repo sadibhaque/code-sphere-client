@@ -14,7 +14,7 @@ export default function Announcement() {
         queryKey: ["announcements"],
         queryFn: async () => {
             const response = await axios.get(
-                "http://localhost:3000/announcements"
+                "https://code-sphere-server-nu.vercel.app/announcements"
             );
             return response.data;
         },

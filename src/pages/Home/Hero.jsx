@@ -20,7 +20,7 @@ export default function Hero({ onSearchResults }) {
         setIsSearching(true);
         try {
             const response = await axios.get(
-                `http://localhost:3000/posts/search?tags=${encodeURIComponent(
+                `https://code-sphere-server-nu.vercel.app/posts/search?tags=${encodeURIComponent(
                     searchTerm.trim()
                 )}`
             );

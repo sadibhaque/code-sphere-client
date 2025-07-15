@@ -26,7 +26,9 @@ export default function TagPage() {
             setError(null);
 
             const response = await fetch(
-                `http://localhost:3000/posts/tag/${encodeURIComponent(tagName)}`
+                `https://code-sphere-server-nu.vercel.app/posts/tag/${encodeURIComponent(
+                    tagName
+                )}`
             );
 
             if (!response.ok) {

@@ -105,7 +105,9 @@ export default function AdminDashboard() {
         queryKey: ["tags"],
         queryFn: async () => {
             try {
-                const response = await axios.get("http://localhost:3000/tags");
+                const response = await axios.get(
+                    "https://code-sphere-server-nu.vercel.app/tags"
+                );
                 let fetchedTags = [];
 
                 if (response.data && response.data.length > 0) {
@@ -174,9 +176,12 @@ export default function AdminDashboard() {
             }
 
             // Send update to the server
-            await axios.put(`http://localhost:3000/tags/${tagsId}`, {
-                tagList: updatedTags,
-            });
+            await axios.put(
+                `https://code-sphere-server-nu.vercel.app/tags/${tagsId}`,
+                {
+                    tagList: updatedTags,
+                }
+            );
 
             toast.success(`Tag "${trimmedTag}" added successfully!`);
             setErrors({});
@@ -251,7 +256,7 @@ export default function AdminDashboard() {
             }
 
             await axios.patch(
-                `http://localhost:3000/users/${user.email}/profile`,
+                `https://code-sphere-server-nu.vercel.app/users/${user.email}/profile`,
                 serverUpdateData
             );
 

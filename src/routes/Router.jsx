@@ -42,7 +42,7 @@ const router = createBrowserRouter([
                 loader: async ({ params }) => {
                     const id = params.id;
                     const response = await axios.get(
-                        `http://localhost:3000/posts/${id}`
+                        `https://code-sphere-server-nu.vercel.app/posts/${id}`
                     );
                     return response.data;
                 },
@@ -57,7 +57,7 @@ const router = createBrowserRouter([
                 loader: async ({ params }) => {
                     const id = params.id;
                     const response = await axios.get(
-                        `http://localhost:3000/comment/${id}`
+                        `https://code-sphere-server-nu.vercel.app/comment/${id}`
                     );
                     return response.data;
                 },

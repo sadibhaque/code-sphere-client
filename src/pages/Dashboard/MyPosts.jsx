@@ -34,7 +34,9 @@ export default function MyPosts() {
     const { data: postsData = [] } = useQuery({
         queryKey: ["posts"],
         queryFn: () =>
-            axios.get("http://localhost:3000/posts").then((res) => res.data),
+            axios
+                .get("https://code-sphere-server-nu.vercel.app/posts")
+                .then((res) => res.data),
     });
     const [posts, setPosts] = useState(postsData);
 

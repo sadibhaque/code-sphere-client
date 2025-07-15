@@ -58,7 +58,7 @@ export default function PostDetail() {
         try {
             setLoadingComments(true);
             const response = await axios.get(
-                `http://localhost:3000/comments/${post._id}`
+                `https://code-sphere-server-nu.vercel.app/comments/${post._id}`
             );
             setComments(response.data);
             setCommentsCount(response.data.length);
@@ -106,7 +106,10 @@ export default function PostDetail() {
                     createdAt: new Date().toISOString(),
                 };
 
-                await axios.post("http://localhost:3000/comments", commentData);
+                await axios.post(
+                    "https://code-sphere-server-nu.vercel.app/comments",
+                    commentData
+                );
 
                 console.log(
                     `Comment on post ${post._id} by ${user.email}: ${commentText}`
@@ -131,7 +134,7 @@ export default function PostDetail() {
         try {
             // Send vote to server
             const response = await axios.patch(
-                `http://localhost:3000/posts/${post._id}/vote`,
+                `https://code-sphere-server-nu.vercel.app/posts/${post._id}/vote`,
                 {
                     voteType: type,
                     userId: user.uid,
@@ -194,8 +197,8 @@ export default function PostDetail() {
                     <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12">
                             <AvatarImage
-                                src={user?.photoURL || "/placeholder.svg"}
-                                alt={user?.displayName}
+                                src={post?.authorImage || "/placeholder.svg"}
+                                alt={post?.authorName}
                             />
                             <AvatarFallback>
                                 {user?.displayName.charAt(0)}
@@ -203,10 +206,22 @@ export default function PostDetail() {
                         </Avatar>
                         <div>
                             <p className="font-medium text-lg">
-                                {user?.displayName}
+                                {post?.authorName}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                {post?.createdAt}
+                                {post?.createdAt
+                                    ? new Date(post.createdAt).toLocaleString(
+                                          "en-US",
+                                          {
+                                              year: "numeric",
+                                              month: "short",
+                                              day: "numeric",
+                                              hour: "numeric",
+                                              minute: "2-digit",
+                                              hour12: true,
+                                          }
+                                      )
+                                    : "Unknown time"}
                             </p>
                         </div>
                     </div>

@@ -24,7 +24,9 @@ export default function PostList() {
     const { data: posts = [] } = useQuery({
         queryKey: ["posts"],
         queryFn: async () => {
-            const response = await axios.get("http://localhost:3000/posts");
+            const response = await axios.get(
+                "https://code-sphere-server-nu.vercel.app/posts"
+            );
             return response.data;
         },
     });

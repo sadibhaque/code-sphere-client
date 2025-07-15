@@ -56,7 +56,7 @@ export default function UserDashboard() {
         queryKey: ["posts"],
         queryFn: () =>
             axios
-                .get("http://localhost:3000/posts")
+                .get("https://code-sphere-server-nu.vercel.app/posts")
                 .then((response) => response.data),
     });
 
@@ -126,7 +126,7 @@ export default function UserDashboard() {
             }
 
             await axios.patch(
-                `http://localhost:3000/users/${user.email}/profile`,
+                `https://code-sphere-server-nu.vercel.app/users/${user.email}/profile`,
                 serverUpdateData
             );
 

@@ -13,7 +13,7 @@ The frontend search functionality expects a backend API endpoint at:
 **Example Request:**
 
 ```
-GET http://localhost:3000/posts/search?tags=React
+GET https://code-sphere-server-nu.vercel.app/posts/search?tags=React
 ```
 
 **Expected Response:**

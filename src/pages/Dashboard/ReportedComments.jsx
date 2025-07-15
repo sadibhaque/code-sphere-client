@@ -57,7 +57,7 @@ export default function ReportedComments() {
         queryKey: ["reportedComments"],
         queryFn: () =>
             axios
-                .get("http://localhost:3000/get-reports")
+                .get("https://code-sphere-server-nu.vercel.app/get-reports")
                 .then((res) => res.data),
     });
 
@@ -88,10 +88,10 @@ export default function ReportedComments() {
             if (action === "Delete") {
                 // Call API to delete the comment and update status to "deleted"
                 // await axios.delete(
-                //     `http://localhost:3000/comment-delete/${comment.commentId}`
+                //     `https://code-sphere-server-nu.vercel.app/comment-delete/${comment.commentId}`
                 // );
                 await axios.patch(
-                    `http://localhost:3000/comment-status/${comment._id}`,
+                    `https://code-sphere-server-nu.vercel.app/comment-status/${comment._id}`,
                     {
                         status: "deleted",
                     }
@@ -101,7 +101,7 @@ export default function ReportedComments() {
             } else if (action === "Dismiss") {
                 // Call API to update status to "dismissed"
                 await axios.patch(
-                    `http://localhost:3000/comment-status/${comment._id}`,
+                    `https://code-sphere-server-nu.vercel.app/comment-status/${comment._id}`,
                     {
                         status: "dismissed",
                     }

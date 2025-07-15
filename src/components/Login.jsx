@@ -61,7 +61,9 @@ export default function Login() {
             loginUser(data.email, data.password)
                 .then((userCredential) => {
                     setUser(userCredential.user);
-                    fetch(`http://localhost:3000/users/${data.email}`)
+                    fetch(
+                        `https://code-sphere-server-nu.vercel.app/users/${data.email}`
+                    )
                         .then((response) => response.json())
                         .then((x) => {
                             setUser({

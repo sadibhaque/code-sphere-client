@@ -48,7 +48,7 @@ export default function Navbar() {
             setIsLoggedIn(true);
         }
         axios
-            .get("http://localhost:3000/announcements-count")
+            .get("https://code-sphere-server-nu.vercel.app/announcements-count")
             .then((response) => {
                 const totalAnnouncements = response.data.totalAnnouncements;
                 setAnnouncementCount(totalAnnouncements);
@@ -59,7 +59,7 @@ export default function Navbar() {
     const fetchLatestAnnouncements = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:3000/announcements"
+                "https://code-sphere-server-nu.vercel.app/announcements"
             );
             // Get the latest 4 announcements, sorted by creation date
             const latest = response.data
@@ -97,9 +97,7 @@ export default function Navbar() {
                 isScrolled ? "bg-accent" : "bg-background"
             )}
         >
-            <div
-                className="container mx-auto max-w-10/12 h-16 flex items-center justify-between"
-            >
+            <div className="container mx-auto max-w-10/12 h-16 flex items-center justify-between">
                 <Link
                     to="/"
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity group"

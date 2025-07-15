@@ -53,20 +53,20 @@ const CommentReport = () => {
             status: "pending",
         };
 
-            axios
-                .post("http://localhost:3000/reports", data)
-                .then(() => {
-                    e.target.reset();
-                    toast.success("Report submitted successfully!");
-                    navigate(`/post-details/${comment.postId}`);
-                })
-                .catch((error) => {
-                    console.error("Error submitting report:", error);
-                    toast.error(
-                        "Failed to submit report: " +
-                            (error.response?.data?.message || "Unknown error")
-                    );
-                });
+        axios
+            .post("https://code-sphere-server-nu.vercel.app/reports", data)
+            .then(() => {
+                e.target.reset();
+                toast.success("Report submitted successfully!");
+                navigate(`/post-details/${comment.postId}`);
+            })
+            .catch((error) => {
+                console.error("Error submitting report:", error);
+                toast.error(
+                    "Failed to submit report: " +
+                        (error.response?.data?.message || "Unknown error")
+                );
+            });
     };
     return (
         <div>
