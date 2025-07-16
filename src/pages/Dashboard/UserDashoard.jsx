@@ -21,7 +21,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Edit } from "lucide-react";
+import { Award, Edit } from "lucide-react";
 import PostCard from "../../components/PostCard";
 import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
@@ -387,11 +387,24 @@ export default function UserDashboard() {
                                 {user.displayName}
                             </p>
                             <p className="text-muted-foreground text-sm sm:text-base break-all">
+                                @{userHook?.username}
+                            </p>
+                            <p className="text-muted-foreground text-sm sm:text-base break-all">
                                 {user.email}
                             </p>
-                            <Badge className="w-fit mt-2 mx-auto sm:mx-0">
-                                {userHook?.badge}
-                            </Badge>
+                            <div className="w-fit mt-2 mx-auto sm:mx-0">
+                                {userHook?.badge == "gold" ? (
+                                    <div className="text-yellow-400 flex items-center gap-1">
+                                        <span>Gold User</span>
+                                        <Award className="text-yellow-400" />
+                                    </div>
+                                ) : (
+                                    <div className="text-amber-700 flex items-center gap-1">
+                                        <span>Bronze User</span>
+                                        <Award className="text-amber-700" />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                     <div className="space-y-2">

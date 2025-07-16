@@ -5,10 +5,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AuthContext } from "@/providers/AuthProvider";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useQuery } from "@tanstack/react-query";
+import useUser from "../../hooks/useUser";
+import { useNavigate } from "react-router";
 
 export default function AddPost() {
     const { user } = useContext(AuthContext);
+    const userHook = useUser(user);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const axiosSecure = useAxiosSecure();
 
     const [formData, setFormData] = useState({
         title: "",
@@ -18,6 +24,8 @@ export default function AddPost() {
     const [errors, setErrors] = useState({});
     // Initialize tagList as an empty array
     const [tagList, setTagList] = useState([]);
+    const [postCount, setPostCount] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTags = async () => {
@@ -35,6 +43,23 @@ export default function AddPost() {
 
         fetchTags();
     }, []);
+
+    const { data: count } = useQuery({
+        queryKey: ["postCount", user?.email],
+        queryFn: async () => {
+            const { data } = await axiosSecure.get(
+                `/posts-count-by-user/${user?.email}`
+            );
+            return data;
+        },
+        enabled: !!user?.email,
+    });
+
+    useEffect(() => {
+        if (count) {
+            setPostCount(count.postCount);
+        }
+    }, [count]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -101,6 +126,14 @@ export default function AddPost() {
     const onSubmit = async (e) => {
         e.preventDefault();
         const newErrors = validateForm();
+
+        if (postCount >= 5 && userHook?.role === "bronze") {
+            toast.error(
+                "You have reached the maximum post limit of 5 become an Gold user."
+            );
+            navigate("/membership");
+            return;
+        }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -198,7 +231,7 @@ export default function AddPost() {
                     <Label htmlFor="tags">Tags</Label>
                     <div className="space-y-2">
                         <select
-                            className="w-full p-2 border border-gray-300 rounded-md"
+                            className="w-full p-3 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors hover:border-accent-foreground/20"
                             value=""
                             onChange={(e) => {
                                 if (e.target.value) {
@@ -206,9 +239,15 @@ export default function AddPost() {
                                 }
                             }}
                         >
-                            <option value="">Select a tag...</option>
+                            <option value="" className="text-muted-foreground">
+                                Select a tag...
+                            </option>
                             {tagList.map((tag) => (
-                                <option key={tag} value={tag}>
+                                <option
+                                    key={tag}
+                                    value={tag}
+                                    className="text-foreground bg-background hover:bg-accent"
+                                >
                                     {tag}
                                 </option>
                             ))}
@@ -217,13 +256,15 @@ export default function AddPost() {
                             {formData.tagList.map((tag) => (
                                 <span
                                     key={tag}
-                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
                                 >
+                                    <span className="mr-1">#</span>
                                     {tag}
                                     <button
                                         type="button"
                                         onClick={() => handleTagRemove(tag)}
-                                        className="ml-1 text-blue-600 hover:text-blue-800"
+                                        className="ml-2 text-primary/70 hover:text-primary hover:bg-primary/10 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
+                                        aria-label={`Remove ${tag} tag`}
                                     >
                                         ×
                                     </button>

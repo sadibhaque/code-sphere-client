@@ -31,6 +31,8 @@ export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
     const usersPerPage = 10;
 
     const { user } = useAuth();
@@ -53,15 +55,50 @@ export default function ManageUsers() {
         },
     });
 
+    
+
     useEffect(() => {
         setUsers(data);
+        setFilteredUsers(data);
+        setIsSearching(false);
     }, [data]);
 
-    // Pagination logic
+    // Search function
+    const handleSearch = () => {
+        if (!searchTerm.trim()) {
+            setFilteredUsers(users);
+            setIsSearching(false);
+            setCurrentPage(1);
+            return;
+        }
+
+        const filtered = users.filter(
+            (user) =>
+                user.username
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        setFilteredUsers(filtered);
+        setIsSearching(true);
+        setCurrentPage(1);
+    };
+
+    // Clear search
+    const clearSearch = () => {
+        setSearchTerm("");
+        setFilteredUsers(users);
+        setIsSearching(false);
+        setCurrentPage(1);
+    };
+
+    // Pagination logic - use filtered users when searching
+    const usersToShow = isSearching ? filteredUsers : users;
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.ceil(users.length / usersPerPage);
+    const currentUsers = usersToShow.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(usersToShow.length / usersPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -91,17 +128,43 @@ export default function ManageUsers() {
 
     return (
         <div className="overflow-x-scroll">
-            <div className="flex items-center gap-2 mb-4">
-                <Input
-                    placeholder="Search users by name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="max-w-sm"
-                />
-                <Button onClick={() => console.log("Search triggered")}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+                <div className="flex w-full sm:max-w-sm gap-2">
+                    <Input
+                        placeholder="Search users by name or email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                        className="flex-1"
+                    />
+                    {isSearching && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={clearSearch}
+                            className="px-2"
+                        >
+                            ✕
+                        </Button>
+                    )}
+                </div>
+                <Button onClick={handleSearch} className="w-full sm:w-auto">
                     <Search className="h-4 w-4 mr-2" /> Search
                 </Button>
             </div>
+
+            {/* Search Results Info */}
+            {isSearching && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                        {filteredUsers.length === 0
+                            ? `No users found for "${searchTerm}"`
+                            : `Found ${filteredUsers.length} user${
+                                  filteredUsers.length !== 1 ? "s" : ""
+                              } matching "${searchTerm}"`}
+                    </p>
+                </div>
+            )}
 
             <div className="hidden lg:block">
                 <Table className="min-w-[600px] table-auto">
@@ -120,9 +183,11 @@ export default function ManageUsers() {
                             <TableRow>
                                 <TableCell
                                     colSpan={4}
-                                    className="text-center py-4 text-muted-foreground"
+                                    className="text-center py-8 text-muted-foreground"
                                 >
-                                    No users found.
+                                    {isSearching
+                                        ? `No users found matching "${searchTerm}"`
+                                        : "No users found."}
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -163,8 +228,29 @@ export default function ManageUsers() {
             <div className="lg:hidden space-y-4">
                 {/* Mobile Cards */}
                 {currentUsers.length === 0 ? (
-                    <div className="text-center py-4 text-muted-foreground">
-                        No users found.
+                    <div className="text-center py-8 p-4 border rounded-lg">
+                        <div className="text-muted-foreground">
+                            {isSearching ? (
+                                <>
+                                    <p className="text-lg font-medium mb-2">
+                                        No Results Found
+                                    </p>
+                                    <p>
+                                        No users found matching "{searchTerm}"
+                                    </p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={clearSearch}
+                                        className="mt-3"
+                                    >
+                                        Clear Search
+                                    </Button>
+                                </>
+                            ) : (
+                                "No users found."
+                            )}
+                        </div>
                     </div>
                 ) : (
                     currentUsers.map((user) => (

@@ -1,39 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router";
 import { ChevronRight, Hash } from "lucide-react";
-
-const tags = [
-    "Next.js",
-    "React",
-    "Web Development",
-    "Tailwind CSS",
-    "CSS",
-    "Styling",
-    "State Management",
-    "JavaScript",
-    "Node.js",
-    "Express.js",
-    "API",
-    "Database",
-    "MongoDB",
-    "SQL",
-    "Serverless",
-    "Vercel",
-    "Cloud",
-    "Performance",
-    "Optimization",
-    "Security",
-    "Best Practices",
-    "Responsive Design",
-    "Frontend",
-    "GraphQL",
-];
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import Loading from "../../components/Loading";
 
 export default function Tags() {
     const [hoveredTag, setHoveredTag] = useState(null);
+    const [tags, setTags] = useState([]);
+
+    useEffect(() => {
+        const fetchTags = async () => {
+            const response = await axios.get(
+                "https://code-sphere-server-nu.vercel.app/tags"
+            );
+            setTags(response.data[0].tagList);
+        };
+        fetchTags();
+    }, []);
 
     return (
         <section className="w-full py-12 animate-fade-in">
@@ -55,7 +42,7 @@ export default function Tags() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-3 justify-center">
-                            {tags.map((tag, index) => (
+                            {tags?.map((tag, index) => (
                                 <Link
                                     to={`/tag/${encodeURIComponent(tag)}`}
                                     key={tag}

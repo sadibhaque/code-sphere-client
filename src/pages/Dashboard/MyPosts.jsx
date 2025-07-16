@@ -20,10 +20,12 @@ import {
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
+import useAuth from "../../hooks/useAuth";
 
 export default function MyPosts() {
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 10; // 10 posts per page as per challenge task
+    const { user } = useAuth();
 
     const totalVotes = (post) => {
         const upvotes = post?.upvotes || 0;
@@ -35,7 +37,9 @@ export default function MyPosts() {
         queryKey: ["posts"],
         queryFn: () =>
             axios
-                .get("https://code-sphere-server-nu.vercel.app/posts")
+                .get(
+                    `https://code-sphere-server-nu.vercel.app/posts/user-posts/${user?.email}`
+                )
                 .then((res) => res.data),
     });
     const [posts, setPosts] = useState(postsData);

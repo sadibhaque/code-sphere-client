@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { AuthContext } from "../providers/AuthProvider";
 import { toast } from "sonner";
 import axios from "axios/unsafe/axios.js";
+import useUser from "../hooks/useUser";
 
 export default function Navbar() {
     const { user, logoutUser } = useContext(AuthContext);
@@ -42,6 +43,8 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+    const userHook = useUser(user);
 
     useEffect(() => {
         if (user) {
@@ -253,7 +256,7 @@ export default function Navbar() {
                                             {user?.displayName || "User"}
                                         </p>
                                         <p className="text-xs leading-none text-muted-foreground">
-                                            {user?.email}
+                                            @{userHook?.username}
                                         </p>
                                     </div>
                                 </DropdownMenuLabel>

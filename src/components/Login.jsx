@@ -11,6 +11,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AuthContext } from "../providers/AuthProvider";
 import { toast } from "sonner";
+import axios from "axios";
 
 // Login form validation schema
 const loginSchema = yup.object().shape({
@@ -33,8 +34,6 @@ export default function Login() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    console.log(user);
-
     // Initialize react-hook-form
     const {
         register,
@@ -49,7 +48,6 @@ export default function Login() {
     const onSubmit = async (data) => {
         try {
             setIsLoading(true);
-            console.log("Login data:", data);
 
             // Here you will add Firebase authentication later
             // For now, just logging the data and simulating a successful login
@@ -99,7 +97,7 @@ export default function Login() {
             const googleUser = result.user;
 
             // Check if user exists in database
-            const response = await fetch(
+            const response = await axios(
                 `https://code-sphere-server-nu.vercel.app/users/${googleUser.email}`
             );
 
@@ -159,7 +157,7 @@ export default function Login() {
                             badge: "Gold",
                         });
 
-                        toast.success("Account created successfully!");
+                        toast.success("Joined successfully!");
                         navigate(`${location.state ? location.state : "/"}`);
                     } else {
                         throw new Error("Failed to create user account");
@@ -170,8 +168,11 @@ export default function Login() {
                 }
             }
         } catch (error) {
-            console.error("Google login error:", error);
-            toast.error(error.message || "Google login failed");
+            if (!user) {
+                navigate(`${location.state ? location.state : "/"}`);
+                console.error("Google login error:", error);
+            }
+            navigate("/");
         } finally {
             setIsGoogleLoading(false);
         }

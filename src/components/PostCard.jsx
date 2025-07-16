@@ -25,7 +25,6 @@ export default function PostCard({ post }) {
 
     useEffect(() => {
         async function fetchComments() {
-            console.log(post);
             const response = await axios.get(
                 `https://code-sphere-server-nu.vercel.app/comments/${post._id}`
             );
