@@ -61,8 +61,6 @@ export default function AdminDashboard() {
     const navigate = useNavigate();
     const axiosSecure = useAxiosSecure();
 
-    // console.log(userHook);
-
     // Redirect non-admin users to user dashboard
     useEffect(() => {
         if (userHook?.role && userHook.role !== "admin") {

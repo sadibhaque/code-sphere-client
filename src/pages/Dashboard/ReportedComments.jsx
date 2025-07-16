@@ -77,7 +77,6 @@ export default function ReportedComments() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     const handleAction = async (comment, action) => {
-        console.log(comment.commentId, comment._id);
         try {
             // Set loading state for this specific comment action
             setLoadingActions((prev) => ({

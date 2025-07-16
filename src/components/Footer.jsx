@@ -9,7 +9,6 @@ export default function Footer() {
 
     const handleNewsletterSubmit = (e) => {
         e.preventDefault();
-        console.log("Newsletter signup:", email);
         setEmail("");
     };
 

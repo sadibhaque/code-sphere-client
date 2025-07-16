@@ -25,7 +25,6 @@ import {
 
 const CommentReport = () => {
     const comment = useLoaderData();
-    console.log(comment);
     const { user } = useAuth();
     const navigate = useNavigate();
     const [feedbackType, setFeedbackType] = useState("");

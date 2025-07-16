@@ -111,9 +111,6 @@ export default function PostDetail() {
                     commentData
                 );
 
-                console.log(
-                    `Comment on post ${post._id} by ${user.email}: ${commentText}`
-                );
                 setCommentText("");
                 setCommentsCount((prev) => prev + 1);
                 toast.success("Comment added successfully!");
@@ -390,9 +387,6 @@ export default function PostDetail() {
                                             </p>
                                             <Link
                                                 to={`/comment-report/${comment._id}`}
-                                                onClick={() => {
-                                                    console.log(comment._id);
-                                                }}
                                                 className="text-xs text-muted-foreground underline"
                                             >
                                                 Report Comment

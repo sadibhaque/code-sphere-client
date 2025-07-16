@@ -47,7 +47,6 @@ export default function MakeAnnouncement() {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        console.log(formData);
 
         axios
             .post("https://code-sphere-server-nu.vercel.app/announcements", {
@@ -56,7 +55,6 @@ export default function MakeAnnouncement() {
             })
             .then(() => {
                 toast.success("Announcement made successfully!");
-                console.log("done");
             });
 
         // Reset form

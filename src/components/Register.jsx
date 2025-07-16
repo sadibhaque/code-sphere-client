@@ -235,7 +235,6 @@ export default function Register() {
                     });
 
                     toast.success("Registration successful");
-                    console.log("Registration successful");
                     // Reset form after successful registration
                     reset();
                     // Navigate to home or previous page

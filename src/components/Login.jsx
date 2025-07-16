@@ -74,7 +74,6 @@ export default function Login() {
                 })
                 .catch((error) => {
                     toast.error(error.message);
-                    console.log(error.message);
                 });
 
             // Reset form after successful login

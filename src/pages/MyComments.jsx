@@ -85,7 +85,6 @@ export default function MyComments() {
             commenterName: comment.userName,
             status: "pending",
         };
-        console.log(comment);
         axios
             .post("https://code-sphere-server-nu.vercel.app/reports", data)
             .then(() => {
