@@ -20,6 +20,7 @@ import CommentReport from "../pages/CommentReport";
 import MyComments from "../pages/MyComments";
 import DashboardRedirect from "../components/DashboardRedirect";
 import TagPage from "../pages/TagPage";
+import Error from "../pages/Error";
 
 const router = createBrowserRouter([
     {
@@ -165,6 +166,10 @@ const router = createBrowserRouter([
                 ),
             },
         ],
+    },
+    {
+        path: "/*",
+        element: <Error></Error>,
     },
 ]);
 
