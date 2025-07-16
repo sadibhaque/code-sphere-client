@@ -256,7 +256,7 @@ export default function Navbar() {
                                             {user?.displayName || "User"}
                                         </p>
                                         <p className="text-xs leading-none text-muted-foreground">
-                                            @{userHook?.username}
+                                            {user.email}
                                         </p>
                                     </div>
                                 </DropdownMenuLabel>

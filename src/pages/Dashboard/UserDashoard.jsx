@@ -387,9 +387,6 @@ export default function UserDashboard() {
                                 {user.displayName}
                             </p>
                             <p className="text-muted-foreground text-sm sm:text-base break-all">
-                                @{userHook?.username}
-                            </p>
-                            <p className="text-muted-foreground text-sm sm:text-base break-all">
                                 {user.email}
                             </p>
                             <div className="w-fit mt-2 mx-auto sm:mx-0">
