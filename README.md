@@ -1,10 +1,10 @@
 # CodeSphere - Developer Community Platform
 
-![CodeSphere Logo](https://i.ibb.co/nQKx88Q/code-sphere-logo.png)
+<img src="https://i.ibb.co.com/fYj4M1QC/image.png" alt="Banner" style="width:100%;"/>
 
 ## Live URLs
 
--   **Frontend:** [https://sadib-assignment-12-ph.netlify.app/](https://sadib-assignment-12-ph.netlify.app/)
+-   **Frontend:** [https://sadib-assignment-12-ph.netlify.app/](https://the-code-sphere.netlify.app/)
 -   **Backend:** [https://code-sphere-server-nu.vercel.app/](https://code-sphere-server-nu.vercel.app/)
 
 ## Project Overview
