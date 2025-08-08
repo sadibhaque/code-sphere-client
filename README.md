@@ -110,7 +110,29 @@ CodeSphere is a modern developer community platform where programmers can share 
 }
 ```
 
-## Getting Started
+---
+
+## 🛠️ Getting Started
+
+1. Clone the Repository
+
+    ```bash
+    git clone https://github.com/sadibhaque/code-sphere-client.git
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    cd code-sphere-client
+    npm install
+    ```
+
+3. Start the development server:
+
+    ```bash
+    npm run dev
+    ```
+
 
 ### Prerequisites
 
