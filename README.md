@@ -4,7 +4,7 @@
 
 ## Live URLs
 
--   **Frontend:** [https://sadib-assignment-12-ph.netlify.app/](https://the-code-sphere.netlify.app/)
+-   **Frontend:** [https://the-code-sphere.netlify.app/](https://the-code-sphere.netlify.app/)
 -   **Backend:** [https://code-sphere-server-nu.vercel.app/](https://code-sphere-server-nu.vercel.app/)
 
 ## Project Overview
