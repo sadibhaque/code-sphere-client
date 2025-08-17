@@ -30,11 +30,14 @@ import {
 } from "@/components/ui/sidebar";
 import useUser from "../hooks/useUser";
 import useAuth from "../hooks/useAuth";
+import useRole from "../hooks/useRole";
+import Loading from "../components/Loading";
 import { Button } from "@/components/ui/button";
 
 export default function DashBoardLayout() {
     const { user } = useAuth();
     const userHook = useUser(user);
+    const { role, loading } = useRole(user);
     const { pathname } = useLocation();
 
     const userNavItems = [
@@ -66,8 +69,17 @@ export default function DashBoardLayout() {
         },
     ];
 
-    const navItems = userHook?.role === "admin" ? adminNavItems : userNavItems;
-    const dashboardType = userHook?.role === "admin" ? "Admin" : "User";
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loading />
+            </div>
+        );
+    }
+
+    const effectiveRole = role || userHook?.role;
+    const navItems = effectiveRole === "admin" ? adminNavItems : userNavItems;
+    const dashboardType = effectiveRole === "admin" ? "Admin" : "User";
 
     return (
         <div className="flex flex-col h-screen overflow-hidden">
@@ -131,7 +143,7 @@ export default function DashBoardLayout() {
                                 </h1>
                                 <Link to="/">
                                     <Button className="bg-primary">
-                                       <ArrowLeft></ArrowLeft> Home
+                                        <ArrowLeft></ArrowLeft> Home
                                     </Button>
                                 </Link>
                             </div>

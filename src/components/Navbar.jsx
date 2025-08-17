@@ -178,12 +178,7 @@ export default function Navbar() {
                         {/* When logged in, show Dashboard as the 5th visible link */}
                         {isLoggedIn && (
                             <Link
-                                to={
-                                    user?.role === "admin" ||
-                                    user?.metadata?.role === "admin"
-                                        ? "/dashboard/admin"
-                                        : "/dashboard/user"
-                                }
+                                to="/dashboard"
                                 className="text-sm font-medium hover:text-primary transition-colors relative group"
                             >
                                 Dashboard
@@ -490,7 +485,7 @@ export default function Navbar() {
                                 user?.metadata?.role === "admin" ? (
                                     <>
                                         <Link
-                                            to="/dashboard/admin"
+                                            to="/dashboard"
                                             className="text-sm font-medium hover:text-primary transition-colors"
                                             onClick={() =>
                                                 setIsMobileMenuOpen(false)
@@ -529,7 +524,7 @@ export default function Navbar() {
                                 ) : (
                                     <>
                                         <Link
-                                            to="/dashboard/user"
+                                            to="/dashboard"
                                             className="text-sm font-medium hover:text-primary transition-colors"
                                             onClick={() =>
                                                 setIsMobileMenuOpen(false)
