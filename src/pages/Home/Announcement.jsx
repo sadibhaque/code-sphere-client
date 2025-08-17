@@ -67,7 +67,7 @@ export default function Announcement() {
                         </div>
                         <Badge
                             variant="secondary"
-                            className="w-fit bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800"
+                            className="w-fit"
                         >
                             {announcements.length} New Update
                             {announcements.length > 1 ? "s" : ""}
@@ -80,11 +80,11 @@ export default function Announcement() {
                                     <div
                                         key={announcement.id}
                                         className={cn(
-                                            "p-3 sm:p-4 rounded-xl bg-background border border-amber-200/50 dark:border-amber-800/50 transition-all-smooth hover-lift cursor-pointer stagger-item",
+                                            "p-3 sm:p-4 rounded-xl bg-background border transition-all-smooth hover-lift cursor-pointer stagger-item",
                                             "",
                                             hoveredAnnouncement ===
                                                 announcement.id &&
-                                                "shadow-md border-amber-300 dark:border-amber-700"
+                                                "shadow-md"
                                         )}
                                         style={{
                                             animationDelay: `${index * 0.1}s`,
@@ -118,8 +118,8 @@ export default function Announcement() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
-                                                <Megaphone className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                            <div className="p-2 rounded-full bg-primary">
+                                                <Megaphone className="h-4 w-4 text-background" />
                                             </div>
                                         </div>
                                     </div>

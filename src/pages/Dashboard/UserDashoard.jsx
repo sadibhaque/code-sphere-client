@@ -217,7 +217,7 @@ export default function UserDashboard() {
 
     return (
         <div className="mx-auto space-y-4 sm:space-y-6 overflow-hidden">
-            <Card className="w-full">
+            <Card className="w-full bg-accent">
                 <CardHeader>
                     <div className="flex justify-between items-start">
                         <div>
@@ -392,10 +392,10 @@ export default function UserDashboard() {
                             </p>
                             <div className="w-fit mt-2 mx-auto sm:mx-0">
                                 {userHook?.badge == "gold" ? (
-                                    <div className="text-yellow-400 flex items-center gap-1">
+                                    <Badge className="text-yellow-600 bg-background flex items-center  gap-1">
                                         <span>Gold User</span>
-                                        <Award className="text-yellow-400" />
-                                    </div>
+                                        <Award className="text-yellow-600" />
+                                    </Badge>
                                 ) : (
                                     <div className="text-amber-700 flex items-center gap-1">
                                         <span>Bronze User</span>
@@ -415,7 +415,7 @@ export default function UserDashboard() {
                 </CardContent>
             </Card>
 
-            <Card className="">
+            <Card className="bg-accent">
                 <CardHeader>
                     <CardTitle className="text-lg sm:text-xl">
                         My Recent Posts

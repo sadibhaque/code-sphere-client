@@ -26,7 +26,6 @@ import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Loading from "@/components/Loading";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -48,7 +47,7 @@ export default function ManageUsers() {
         }
     }, [userHook, navigate]);
 
-    const { data = [], isLoading } = useQuery({
+    const { data = [] } = useQuery({
         queryKey: ["users"],
         queryFn: async () => {
             const response = await axiosSecure.get("/get-all-users");
@@ -167,9 +166,6 @@ export default function ManageUsers() {
                 </div>
             )}
 
-            {isLoading ? (
-                <Loading />
-            ) : (
             <div className="hidden lg:block">
                 <Table className="min-w-[600px] table-auto">
                     <TableHeader>
@@ -228,11 +224,7 @@ export default function ManageUsers() {
                     </TableBody>
                 </Table>
             </div>
-            )}
 
-            {isLoading ? (
-                <Loading />
-            ) : (
             <div className="lg:hidden space-y-4">
                 {/* Mobile Cards */}
                 {currentUsers.length === 0 ? (
@@ -291,7 +283,6 @@ export default function ManageUsers() {
                     ))
                 )}
             </div>
-            )}
 
             <div className="mt-4">
                 <Pagination>

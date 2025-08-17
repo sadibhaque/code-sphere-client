@@ -21,7 +21,6 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import useAuth from "../../hooks/useAuth";
-import Loading from "@/components/Loading";
 
 export default function MyPosts() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -34,7 +33,7 @@ export default function MyPosts() {
         return upvotes - downvotes;
     };
 
-    const { data: postsData = [], isLoading } = useQuery({
+    const { data: postsData = [] } = useQuery({
         queryKey: ["posts"],
         queryFn: () =>
             axios
@@ -90,13 +89,7 @@ export default function MyPosts() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={3}>
-                                    <Loading className="h-40" iconClassName="mx-auto h-8 w-8 animate-spin text-primary" />
-                                </TableCell>
-                            </TableRow>
-                        ) : currentPosts.length === 0 ? (
+                        {currentPosts.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={3}

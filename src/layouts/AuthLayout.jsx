@@ -15,7 +15,7 @@ const AuthLayout = () => {
                                 to="/auth/login"
                                 className={({ isActive }) =>
                                     isActive
-                                        ? "text-base bg-primary text-gray-800 px-2 py-1 rounded-xl font-medium"
+                                        ? "text-base bg-primary text-background px-2 py-1 rounded-xl font-medium"
                                         : "text-base px-2 font-medium"
                                 }
                             >
@@ -25,7 +25,7 @@ const AuthLayout = () => {
                                 to="/auth/register"
                                 className={({ isActive }) =>
                                     isActive
-                                        ? "text-base bg-primary text-gray-800 px-2 py-1 rounded-xl font-medium"
+                                        ? "text-base bg-primary text-background px-2 py-1 rounded-xl font-medium"
                                         : "text-base px-2 font-medium"
                                 }
                             >

@@ -3,17 +3,17 @@ import { Quote } from "lucide-react";
 
 const items = [
     {
-        name: "Ayesha",
+        name: "Mendax",
         role: "Frontend Dev",
         quote: "CodeSphere helped me get faster answers and meet devs who care.",
     },
     {
-        name: "Rahim",
+        name: "Sahib",
         role: "Full-stack Engineer",
         quote: "I love the quality of discussions and the vibe of the community.",
     },
     {
-        name: "Ria",
+        name: "Ariana",
         role: "Student",
         quote: "Posting is easy and the feedback is super helpful!",
     },
