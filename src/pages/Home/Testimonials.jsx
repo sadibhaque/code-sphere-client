@@ -23,7 +23,10 @@ export default function Testimonials() {
     return (
         <section id="testimonials" className="w-full py-12 animate-fade-in">
             <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
-                <Card className="border-0 shadow-xl hover-lift">
+                <Card className="border-0 relative overflow-hidden bg-accent shadow-xl hover-lift">
+                    <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-primary/20 blur-2xl" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/10 blur-2xl" />
+
                     <CardHeader className="flex items-center gap-3">
                         <div className="p-3 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
                             <Quote className="h-6 w-6" />
