@@ -31,7 +31,7 @@ export default function Announcement() {
                 <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 hover-lift overflow-hidden">
                     <CardHeader className="pb-6">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-3 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white animate-pulse-slow">
+                            <div className="p-3 rounded-full bg-primary text-primary-foreground animate-pulse-slow">
                                 <Megaphone className="h-6 w-6" />
                             </div>
                             <div>
