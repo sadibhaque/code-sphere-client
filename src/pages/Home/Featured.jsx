@@ -32,7 +32,10 @@ export default function Featured() {
     return (
         <section id="featured" className="w-full py-12 animate-fade-in">
             <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
-                <Card className="border-0 shadow-xl hover-lift overflow-hidden">
+                <Card className="border-0 shadow-xl relative bg-accent hover-lift overflow-hidden">
+                    <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-primary/20 blur-2xl" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/10 blur-2xl" />
+
                     <CardHeader className="pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground animate-pulse-slow">
@@ -61,7 +64,7 @@ export default function Featured() {
                                     key={post._id}
                                     className="group"
                                 >
-                                    <div className="rounded-2xl border bg-accent p-4 h-full transition-all-smooth hover-lift">
+                                    <div className="rounded-2xl border bg-background p-4 h-full transition-all-smooth hover-lift">
                                         <div className="flex items-center justify-between mb-2">
                                             <Badge
                                                 variant="secondary"
