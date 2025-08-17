@@ -21,6 +21,7 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import Loading from "@/components/Loading";
 
 export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -95,9 +96,7 @@ export default function ManageUsers() {
             </div>
 
             {isLoading ? (
-                <div className="flex justify-center items-center h-40">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                </div>
+                <Loading />
             ) : (
                 <div className="w-full overflow-x-auto">
                     <Table className="min-w-[600px]">

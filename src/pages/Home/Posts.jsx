@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import PostCard from "../../components/PostCard";
 import axios from "axios/unsafe/axios.js";
 import { useQuery } from "@tanstack/react-query";
+import Loading from "@/components/Loading";
 
 export default function PostList() {
     const [sortBy, setSortBy] = useState("newest");
@@ -21,7 +22,7 @@ export default function PostList() {
     const postsPerPage = 5;
     // const [posts, setPosts] = useState([]);
 
-    const { data: posts = [] } = useQuery({
+    const { data: posts = [], isLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: async () => {
             const response = await axios.get(
@@ -112,6 +113,7 @@ export default function PostList() {
                     </CardHeader>
 
                     <CardContent className="space-y-6">
+                        {isLoading && <Loading />}
                         {currentPosts.map((post, index) => (
                             <div
                                 key={post.id}

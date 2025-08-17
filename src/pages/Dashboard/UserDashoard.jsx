@@ -27,8 +27,9 @@ import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import axios from "../../../node_modules/axios/lib/axios";
+import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import Loading from "@/components/Loading";
 
 export default function UserDashboard() {
     const { user, updateUser } = useAuth();
@@ -52,7 +53,7 @@ export default function UserDashboard() {
         }
     }, [userHook, navigate]);
 
-    const { data: posts = [] } = useQuery({
+    const { data: posts = [], isLoading: postsLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: () =>
             axios
@@ -424,7 +425,9 @@ export default function UserDashboard() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 ">
-                    {recentPosts.length > 0 ? (
+                    {postsLoading ? (
+                        <Loading />
+                    ) : recentPosts.length > 0 ? (
                         <div className="space-y-4 w-full">
                             {recentPosts.map((post) => (
                                 <div key={post.id} className="w-full min-w-0">

@@ -6,11 +6,12 @@ import { Megaphone, Calendar, Clock } from "lucide-react";
 import { useState } from "react";
 import axios from "axios/unsafe/axios.js";
 import { useQuery } from "@tanstack/react-query";
+import Loading from "@/components/Loading";
 
 export default function Announcement() {
     const [hoveredAnnouncement, setHoveredAnnouncement] = useState(null);
 
-    const { data: announcements = [] } = useQuery({
+    const { data: announcements = [], isLoading } = useQuery({
         queryKey: ["announcements"],
         queryFn: async () => {
             const response = await axios.get(
@@ -21,6 +22,23 @@ export default function Announcement() {
         refetchOnWindowFocus: false,
     });
 
+    if (isLoading) {
+        return (
+            <section
+                id="announcements"
+                className="w-full py-12 animate-fade-in"
+            >
+                <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
+                    <Card className="border-0 shadow-xl bg-accent relative overflow-hidden">
+                        <CardContent>
+                            <Loading />
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+        );
+    }
+
     if (announcements.length === 0) {
         return null;
     }
@@ -28,7 +46,10 @@ export default function Announcement() {
     return (
         <section id="announcements" className="w-full py-12 animate-fade-in">
             <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 hover-lift overflow-hidden">
+                <Card className="border-0 shadow-xl bg-accent relative hover-lift overflow-hidden">
+                    <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-primary/20 blur-2xl" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/10 blur-2xl" />
+
                     <CardHeader className="pb-6">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-3 rounded-full bg-primary text-primary-foreground animate-pulse-slow">
@@ -59,8 +80,8 @@ export default function Announcement() {
                                     <div
                                         key={announcement.id}
                                         className={cn(
-                                            "p-3 sm:p-4 rounded-xl border border-amber-200/50 dark:border-amber-800/50 transition-all-smooth hover-lift cursor-pointer stagger-item",
-                                            "bg-gradient-to-r from-background/50 to-amber-50/50 dark:to-amber-950/50",
+                                            "p-3 sm:p-4 rounded-xl bg-background border border-amber-200/50 dark:border-amber-800/50 transition-all-smooth hover-lift cursor-pointer stagger-item",
+                                            "",
                                             hoveredAnnouncement ===
                                                 announcement.id &&
                                                 "shadow-md border-amber-300 dark:border-amber-700"

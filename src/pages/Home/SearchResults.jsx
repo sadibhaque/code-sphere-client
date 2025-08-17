@@ -10,7 +10,10 @@ export default function SearchResults({ results, searchTerm, onClearSearch }) {
     return (
         <section className="w-full py-8 animate-fade-in">
             <div className="container mx-auto px-4 md:px-6">
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-background to-muted/20">
+                <Card className="border-0 relative overflow-hidden shadow-xl bg-accent">
+                    <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-primary/20 blur-2xl" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/10 blur-2xl" />
+
                     <CardHeader className="text-center pb-6">
                         <div className="flex items-center justify-center gap-3 mb-4">
                             <div className="p-3 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">

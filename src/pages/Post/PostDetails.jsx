@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -52,7 +52,7 @@ export default function PostDetail() {
     const [comments, setComments] = useState([]);
     const [loadingComments, setLoadingComments] = useState(false);
 
-    const fetchComments = async () => {
+    const fetchComments = useCallback(async () => {
         if (!post?._id) return;
 
         try {
@@ -68,11 +68,11 @@ export default function PostDetail() {
         } finally {
             setLoadingComments(false);
         }
-    };
+    }, [post._id]);
 
     useEffect(() => {
         fetchComments();
-    }, [post._id]);
+    }, [fetchComments]);
 
     // Check user's current vote status when component loads
     useEffect(() => {
@@ -335,9 +335,7 @@ export default function PostDetail() {
 
                         <div className="py-4 space-y-4">
                             {loadingComments ? (
-                                <div className="text-center py-6">
-                                    Loading comments...
-                                </div>
+                                <Loading />
                             ) : comments.length === 0 ? (
                                 <div className="text-center py-6 text-muted-foreground">
                                     No comments yet

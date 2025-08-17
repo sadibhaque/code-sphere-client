@@ -37,6 +37,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import Loading from "@/components/Loading";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
@@ -72,7 +73,7 @@ export default function AdminDashboard() {
     const [userCount, setUserCount] = useState(0);
     const [commentCount, setCommentCount] = useState(0);
 
-    useQuery({
+    const { isLoading: postCountLoading } = useQuery({
         queryKey: ["postCount"],
         queryFn: async () => {
             const response = await axiosSecure.get("/posts-count");
@@ -81,7 +82,7 @@ export default function AdminDashboard() {
         },
     });
 
-    useQuery({
+    const { isLoading: usersCountLoading } = useQuery({
         queryKey: ["usersCount"],
         queryFn: async () => {
             const response = await axiosSecure.get("/users-count");
@@ -90,7 +91,7 @@ export default function AdminDashboard() {
         },
     });
 
-    useQuery({
+    const { isLoading: commentsCountLoading } = useQuery({
         queryKey: ["commentsCount"],
         queryFn: async () => {
             const response = await axiosSecure.get("/comments-count");
@@ -99,7 +100,7 @@ export default function AdminDashboard() {
         },
     });
 
-    useQuery({
+    const { isLoading: tagsLoading } = useQuery({
         queryKey: ["tags"],
         queryFn: async () => {
             try {
@@ -539,12 +540,24 @@ export default function AdminDashboard() {
                                     </p>
                                 </div>
                                 <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-                                    Total Posts: {postCount} | Total Comments:{" "}
-                                    {commentCount} | Total Users: {userCount}
+                                    {postCountLoading ||
+                                    usersCountLoading ||
+                                    commentsCountLoading ? (
+                                        <span>Loading stats...</span>
+                                    ) : (
+                                        <>
+                                            Total Posts: {postCount} | Total
+                                            Comments: {commentCount} | Total
+                                            Users: {userCount}
+                                        </>
+                                    )}
                                 </p>
                             </div>
                         </div>
                         <div className="w-full lg:w-120 h-70 mx-auto flex items-center">
+                            {postCountLoading || usersCountLoading || commentsCountLoading ? (
+                                <Loading className="h-40" iconClassName="mx-auto h-8 w-8 animate-spin text-primary" />
+                            ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -576,6 +589,7 @@ export default function AdminDashboard() {
                                     <Legend />
                                 </PieChart>
                             </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
                 </CardContent>
@@ -612,17 +626,21 @@ export default function AdminDashboard() {
                     </form>
                     <div className="mt-4">
                         <h3 className="font-semibold mb-2">Existing Tags:</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {tags.map((tag, index) => (
-                                <Badge
-                                    key={index}
-                                    variant="secondary"
-                                    className="text-xs"
-                                >
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
+                        {tagsLoading ? (
+                            <Loading className="h-24" iconClassName="mx-auto h-6 w-6 animate-spin text-primary" />
+                        ) : (
+                            <div className="flex flex-wrap gap-2">
+                                {tags.map((tag, index) => (
+                                    <Badge
+                                        key={index}
+                                        variant="secondary"
+                                        className="text-xs"
+                                    >
+                                        {tag}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>

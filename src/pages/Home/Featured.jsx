@@ -6,9 +6,10 @@ import { ArrowRight, Flame } from "lucide-react";
 import { Link } from "react-router";
 import axios from "axios/unsafe/axios.js";
 import { useQuery } from "@tanstack/react-query";
+import Loading from "@/components/Loading";
 
 export default function Featured() {
-    const { data: posts = [] } = useQuery({
+    const { data: posts = [], isLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: async () => {
             const res = await axios.get(
@@ -26,6 +27,20 @@ export default function Featured() {
         }));
         return scored.sort((a, b) => b._score - a._score).slice(0, 3);
     }, [posts]);
+
+    if (isLoading) {
+        return (
+            <section id="featured" className="w-full py-12 animate-fade-in">
+                <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
+                    <Card className="border-0 shadow-xl relative bg-accent overflow-hidden">
+                        <CardContent>
+                            <Loading />
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+        );
+    }
 
     if (!featured.length) return null;
 
@@ -50,11 +65,6 @@ export default function Featured() {
                                 </p>
                             </div>
                         </div>
-                        <Link to="#posts">
-                            <Button variant="outline" className="rounded-xl">
-                                View all
-                            </Button>
-                        </Link>
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

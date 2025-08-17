@@ -120,11 +120,11 @@ export default function Navbar() {
     return (
         <header
             className={cn(
-                "sticky top-0 z-50 w-full  transition-all-smooth",
+                "sticky top-0 z-50 w-full  transition-all-smooth border-b",
                 isScrolled ? "bg-background" : "bg-background"
             )}
         >
-            <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12 border-b h-16 flex items-center justify-between">
+            <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12  h-16 flex items-center justify-between">
                 <Link
                     to="/"
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
