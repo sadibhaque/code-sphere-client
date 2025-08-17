@@ -331,7 +331,7 @@ export default function Navbar() {
                                         >
                                             <Link to="/dashboard/admin">
                                                 <LayoutDashboard className="mr-2 h-4 w-4" />
-                                                <span>Admin Dashboard</span>
+                                                <span>My Dashboard</span>
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
