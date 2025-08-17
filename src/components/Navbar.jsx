@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import {
     Code,
     Bell,
@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 import { AuthContext } from "../providers/AuthProvider";
 import { toast } from "sonner";
 import axios from "axios/unsafe/axios.js";
-import useUser from "../hooks/useUser";
+import { ModeToggle } from "@/components/ModeToggle";
 
 export default function Navbar() {
     const { user, logoutUser } = useContext(AuthContext);
@@ -43,8 +43,8 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-    const userHook = useUser(user);
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
@@ -93,6 +93,30 @@ export default function Navbar() {
         }
     };
 
+    // Smoothly navigate to a section on the home page
+    const goToSection = async (id, closeMobile = false) => {
+        const scrollToTarget = () => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+                // Reflect hash in URL without reloading (guarded)
+                if (window?.history?.replaceState) {
+                    window.history.replaceState(null, "", `/#${id}`);
+                }
+            }
+        };
+
+        if (location.pathname !== "/") {
+            navigate("/");
+            // wait a tick for the home to render
+            setTimeout(scrollToTarget, 100);
+        } else {
+            scrollToTarget();
+        }
+
+        if (closeMobile) setIsMobileMenuOpen(false);
+    };
+
     return (
         <header
             className={cn(
@@ -114,7 +138,7 @@ export default function Navbar() {
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    {/* Desktop Navigation - Moved to the right */}
+                    {/* Desktop Navigation - varies by auth (3 when logged out, 5 when logged in) */}
                     <nav className="hidden md:flex items-center gap-6 mr-2">
                         <Link
                             to="/"
@@ -123,14 +147,55 @@ export default function Navbar() {
                             Home
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
                         </Link>
-                        <Link
-                            to="/membership"
+                        {/* Explore section */}
+                        <button
+                            type="button"
+                            onClick={() => goToSection("posts")}
                             className="text-sm font-medium hover:text-primary transition-colors relative group"
                         >
-                            Membership
+                            Explore
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-                        </Link>
+                        </button>
+                        {/* Topics section */}
+                        <button
+                            type="button"
+                            onClick={() => goToSection("topics")}
+                            className="text-sm font-medium hover:text-primary transition-colors relative group"
+                        >
+                            Topics
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </button>
+                        {/* Membership visible only when logged in */}
+                        {isLoggedIn && (
+                            <Link
+                                to="/membership"
+                                className="text-sm font-medium hover:text-primary transition-colors relative group"
+                            >
+                                Membership
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                            </Link>
+                        )}
+                        {/* When logged in, show Dashboard as the 5th visible link */}
+                        {isLoggedIn && (
+                            <Link
+                                to={
+                                    user?.role === "admin" ||
+                                    user?.metadata?.role === "admin"
+                                        ? "/dashboard/admin"
+                                        : "/dashboard/user"
+                                }
+                                className="text-sm font-medium hover:text-primary transition-colors relative group"
+                            >
+                                Dashboard
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                            </Link>
+                        )}
                     </nav>
+
+                    {/* Theme Toggle */}
+                    <div className="hidden md:flex">
+                        <ModeToggle />
+                    </div>
 
                     {/* Notification Bell */}
                     {isLoggedIn && (
@@ -261,22 +326,91 @@ export default function Navbar() {
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    asChild
-                                    className="cursor-pointer"
-                                >
-                                    <Link
-                                        to={
-                                            user?.role === "admin" ||
-                                            user?.metadata?.role === "admin"
-                                                ? "/dashboard/admin"
-                                                : "/dashboard/user"
-                                        }
-                                    >
-                                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                                        <span>Dashboard</span>
-                                    </Link>
-                                </DropdownMenuItem>
+                                {/* Protected routes */}
+                                {user?.role === "admin" ||
+                                user?.metadata?.role === "admin" ? (
+                                    <>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/admin">
+                                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                <span>Admin Dashboard</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/admin/manage-users">
+                                                Manage Users
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/admin/reported-comments">
+                                                Reported Comments
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/admin/make-announcement">
+                                                Make Announcement
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/membership">
+                                                Membership
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </>
+                                ) : (
+                                    <>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/user">
+                                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                <span>My Dashboard</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/user/add-post">
+                                                Add Post
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/dashboard/user/my-posts">
+                                                My Posts
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="cursor-pointer"
+                                        >
+                                            <Link to="/membership">
+                                                Membership
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
                                 <DropdownMenuItem
                                     onClick={handleLogout}
                                     className="cursor-pointer text-red-600 focus:text-red-600"
@@ -314,6 +448,9 @@ export default function Navbar() {
             {isMobileMenuOpen && (
                 <div className="md:hidden border-t bg-background/95 backdrop-blur-sm animate-fade-in">
                     <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
+                        <div className="flex justify-end mb-2">
+                            <ModeToggle />
+                        </div>
                         <Link
                             to="/"
                             className="text-sm font-medium hover:text-primary transition-colors"
@@ -321,13 +458,107 @@ export default function Navbar() {
                         >
                             Home
                         </Link>
-                        <Link
-                            to="/membership"
-                            className="text-sm font-medium hover:text-primary transition-colors"
-                            onClick={() => setIsMobileMenuOpen(false)}
+                        <button
+                            type="button"
+                            className="text-left text-sm font-medium hover:text-primary transition-colors"
+                            onClick={() => goToSection("posts", true)}
                         >
-                            Membership
-                        </Link>
+                            Explore
+                        </button>
+                        <button
+                            type="button"
+                            className="text-left text-sm font-medium hover:text-primary transition-colors"
+                            onClick={() => goToSection("topics", true)}
+                        >
+                            Topics
+                        </button>
+                        {isLoggedIn && (
+                            <Link
+                                to="/membership"
+                                className="text-sm font-medium hover:text-primary transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Membership
+                            </Link>
+                        )}
+                        {isLoggedIn && (
+                            <>
+                                <div className="pt-2 mt-2 border-t text-xs text-muted-foreground">
+                                    Dashboard & Tools
+                                </div>
+                                {user?.role === "admin" ||
+                                user?.metadata?.role === "admin" ? (
+                                    <>
+                                        <Link
+                                            to="/dashboard/admin"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Admin Dashboard
+                                        </Link>
+                                        <Link
+                                            to="/dashboard/admin/manage-users"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Manage Users
+                                        </Link>
+                                        <Link
+                                            to="/dashboard/admin/reported-comments"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Reported Comments
+                                        </Link>
+                                        <Link
+                                            to="/dashboard/admin/make-announcement"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Make Announcement
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link
+                                            to="/dashboard/user"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            My Dashboard
+                                        </Link>
+                                        <Link
+                                            to="/dashboard/user/add-post"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Add Post
+                                        </Link>
+                                        <Link
+                                            to="/dashboard/user/my-posts"
+                                            className="text-sm font-medium hover:text-primary transition-colors"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            My Posts
+                                        </Link>
+                                    </>
+                                )}
+                            </>
+                        )}
                     </nav>
                 </div>
             )}

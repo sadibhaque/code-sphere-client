@@ -13,13 +13,14 @@ import { CheckCircle, Crown, Star, Zap, Shield, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useAuth from "../../hooks/useAuth";
 import useUser from "../../hooks/useUser";
-import axios from "axios";
+import { useNavigate } from "react-router";
 
 export default function MembershipCard() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading] = useState(false);
     const { user } = useAuth();
     const userHook = useUser(user);
     const [status, setStatus] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (userHook?.badge === "gold") {
@@ -27,20 +28,7 @@ export default function MembershipCard() {
         }
     }, [userHook]);
 
-    const handleBecomeMember = async () => {
-        setIsLoading(true);
-        try {
-            await axios.patch(
-                `https://code-sphere-server-nu.vercel.app/users/${userHook._id}/badge`,
-                { badge: "gold" }
-            );
-            setStatus(true);
-        } catch (error) {
-            console.error("Failed to update badge", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // No direct upgrade here; handled on checkout page after successful payment
 
     const features = [
         { icon: Zap, text: "Post more than 5 times", highlight: true },
@@ -176,7 +164,11 @@ export default function MembershipCard() {
                         <div className="mx-auto w-full">
                             <Button
                                 className="w-full h-14 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-semibold text-lg transition-all-smooth hover:scale-105 shadow-lg"
-                                onClick={handleBecomeMember}
+                                onClick={() =>
+                                    navigate(
+                                        `/membership/checkout?plan=gold&price=9.99`
+                                    )
+                                }
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -193,6 +185,7 @@ export default function MembershipCard() {
                                     </div>
                                 )}
                             </Button>
+                            {/* Checkout handled on dedicated route */}
                             <div className="text-center card mt-4 text-xs text-muted-foreground">
                                 🔒 Secure payment • 30-day money-back guarantee
                             </div>

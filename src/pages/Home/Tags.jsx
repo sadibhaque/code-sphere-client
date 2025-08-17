@@ -23,7 +23,7 @@ export default function Tags() {
     }, []);
 
     return (
-        <section className="w-full py-12 animate-fade-in">
+        <section id="topics" className="w-full py-12 animate-fade-in">
             <div className="container max-w-4xl px-4 lg:px-0 lg:max-w-10/12 mx-auto">
                 <Card className="border-0 shadow-xl hover-lift">
                     <CardHeader className="text-center pb-8">

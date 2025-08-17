@@ -5,6 +5,29 @@
         <link rel="icon" type="image/svg+xml" href="/logo.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Codesphere</title>
+        <script>
+            // Prevent FOUC by applying theme ASAP
+            (function () {
+                try {
+                    var storageKey = "vite-ui-theme";
+                    var stored = localStorage.getItem(storageKey);
+                    var theme = stored || "system";
+                    var d = document.documentElement;
+                    d.classList.remove("light", "dark");
+                    if (theme === "system") {
+                        var prefersDark =
+                            window.matchMedia &&
+                            window.matchMedia("(prefers-color-scheme: dark)")
+                                .matches;
+                        d.classList.add(prefersDark ? "dark" : "light");
+                    } else {
+                        d.classList.add(theme);
+                    }
+                } catch (e) {
+                    // no-op
+                }
+            })();
+        </script>
     </head>
     <body>
         <div id="root"></div>

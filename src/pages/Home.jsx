@@ -4,6 +4,10 @@ import Tags from "./Home/Tags";
 import Announcement from "./Home/Announcement";
 import Posts from "./Home/Posts";
 import SearchResults from "./Home/SearchResults";
+import Featured from "./Home/Featured";
+import Promotion from "./Home/Promotion";
+import Testimonials from "./Home/Testimonials";
+import Newsletter from "./Home/Newsletter";
 
 const Home = () => {
     const [searchResults, setSearchResults] = useState([]);
@@ -28,9 +32,13 @@ const Home = () => {
                 onClearSearch={clearSearch}
             />
             <>
+                <Featured />
                 <Tags />
                 <Announcement />
+                <Promotion />
                 <Posts />
+                <Testimonials />
+                <Newsletter />
             </>
         </div>
     );

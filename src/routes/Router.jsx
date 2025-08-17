@@ -11,6 +11,7 @@ import AddPost from "../pages/Dashboard/AddPost";
 import MyPosts from "../pages/Dashboard/MyPosts";
 import PostDetail from "../pages/Post/PostDetails";
 import MembershipCard from "../pages/Membership/Membership";
+import Checkout from "../pages/Membership/Checkout";
 import AuthLayout from "../layouts/AuthLayout";
 import Register from "../components/Register";
 import Login from "../components/Login";
@@ -67,6 +68,14 @@ const router = createBrowserRouter([
                 element: (
                     <PrivateRoute>
                         <MembershipCard />
+                    </PrivateRoute>
+                ),
+            },
+            {
+                path: "/membership/checkout",
+                element: (
+                    <PrivateRoute>
+                        <Checkout />
                     </PrivateRoute>
                 ),
             },

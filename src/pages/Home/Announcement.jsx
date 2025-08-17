@@ -26,7 +26,7 @@ export default function Announcement() {
     }
 
     return (
-        <section className="w-full py-12 animate-fade-in">
+        <section id="announcements" className="w-full py-12 animate-fade-in">
             <div className="container mx-auto max-w-4xl px-4 lg:px-0 lg:max-w-10/12">
                 <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 hover-lift overflow-hidden">
                     <CardHeader className="pb-6">

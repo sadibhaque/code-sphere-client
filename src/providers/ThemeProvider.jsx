@@ -15,30 +15,46 @@ export function ThemeProvider({
         () => localStorage.getItem(storageKey) || defaultTheme
     );
 
+    // Apply selected or system theme to the root element
     useEffect(() => {
         const root = window.document.documentElement;
-
-        root.classList.remove("light", "dark");
+        const apply = (mode) => {
+            root.classList.remove("light", "dark");
+            root.classList.add(mode);
+        };
 
         if (theme === "system") {
-            const systemTheme = window.matchMedia(
-                "(prefers-color-scheme: dark)"
-            ).matches
-                ? "dark"
-                : "light";
-
-            root.classList.add(systemTheme);
+            const mq = window.matchMedia("(prefers-color-scheme: dark)");
+            apply(mq.matches ? "dark" : "light");
             return;
         }
 
-        root.classList.add(theme);
+        apply(theme);
+    }, [theme]);
+
+    // When in system mode, respond to OS theme changes in real-time
+    useEffect(() => {
+        if (theme !== "system") return;
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        const onChange = () => {
+            const root = window.document.documentElement;
+            root.classList.toggle("dark", mq.matches);
+            root.classList.toggle("light", !mq.matches);
+        };
+        mq.addEventListener?.("change", onChange);
+        // Fallback for older browsers
+        mq.addListener?.(onChange);
+        return () => {
+            mq.removeEventListener?.("change", onChange);
+            mq.removeListener?.(onChange);
+        };
     }, [theme]);
 
     const value = {
         theme,
-        setTheme: (theme) => {
-            localStorage.setItem(storageKey, theme);
-            setTheme(theme);
+        setTheme: (nextTheme) => {
+            localStorage.setItem(storageKey, nextTheme);
+            setTheme(nextTheme);
         },
     };
 
