@@ -25,7 +25,9 @@ export default function Tags() {
     return (
         <section id="topics" className="w-full py-12 animate-fade-in">
             <div className="container max-w-4xl px-4 lg:px-0 lg:max-w-10/12 mx-auto">
-                <Card className="border-0 shadow-xl hover-lift">
+                <Card className="border-0 relative overflow-hidden bg-accent shadow-xl hover-lift">
+                    <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-primary/20 blur-2xl" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/10 blur-2xl" />
                     <CardHeader className="text-center pb-8">
                         <div className="flex items-center justify-center mb-4">
                             <div className="p-3 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
@@ -56,7 +58,7 @@ export default function Tags() {
                                         className={cn(
                                             "cursor-pointer px-4 py-2 text-sm font-medium rounded-full transition-all-smooth hover:scale-110 hover:shadow-md",
                                             "bg-gradient-to-r from-muted to-muted/80 hover:from-primary/10 hover:to-primary/5",
-                                            "border border-border hover:border-primary/30",
+                                            "border border-border hover:border-primary/30 bg-background",
                                             hoveredTag === tag &&
                                                 "ring-2 ring-primary/20"
                                         )}
