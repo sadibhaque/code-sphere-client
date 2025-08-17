@@ -130,7 +130,7 @@ export default function DashBoardLayout() {
                                     )?.label || `${dashboardType} Dashboard`}
                                 </h1>
                                 <Link to="/">
-                                    <Button className="bg-accent hover:text-black text-amber-50">
+                                    <Button className="bg-primary">
                                        <ArrowLeft></ArrowLeft> Home
                                     </Button>
                                 </Link>
