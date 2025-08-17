@@ -35,7 +35,7 @@ export default function PostCard({ post }) {
 
     return (
         <Card
-            className="max-w-[350px] md:max-w-[600px] lg:max-w-full mx-auto border-0 shadow-lg bg-accent transition-all-smooth hover-lift overflow-hidden"
+            className="max-w-[350px] md:max-w-[600px] lg:max-w-full mx-auto border-0 shadow-lg  transition-all-smooth hover-lift overflow-hidden"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
